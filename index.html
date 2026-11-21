@@ -939,13 +939,77 @@
 
     .exp-col {
       position: relative;
-      padding-top: 6px;
+      min-width: 0;
+      padding: 18px 16px 17px;
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      background: var(--glass-front);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.035), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+      backdrop-filter: blur(14px) saturate(130%);
+      -webkit-backdrop-filter: blur(14px) saturate(130%);
+      transition: transform 240ms ease, border-color 240ms ease, box-shadow 240ms ease, background 240ms ease;
+      outline: none;
     }
+    .exp-col::before {
+      content: "";
+      position: absolute;
+      top: -1px;
+      left: 16px;
+      width: 34px;
+      height: 3px;
+      border-radius: 0 0 4px 4px;
+      background: var(--text);
+      opacity: 0.38;
+      transition: width 240ms ease, opacity 240ms ease, background 240ms ease;
+    }
+    .exp-col:hover,
+    .exp-col:focus-visible {
+      transform: translateY(-7px);
+      border-color: var(--border-strong);
+      background: var(--glass-front);
+      box-shadow: 0 18px 38px rgba(0, 0, 0, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.42);
+    }
+    .exp-col:hover::before,
+    .exp-col:focus-visible::before {
+      width: calc(100% - 32px);
+      opacity: 0.9;
+      background: var(--accent, var(--text));
+    }
+    .exp-wave-wrapper:has(.exp-col:hover) .exp-wave-path,
+    .exp-wave-wrapper:has(.exp-col:focus-visible) .exp-wave-path {
+      stroke: var(--text);
+      stroke-width: 2.4;
+    }
+    .exp-wave-wrapper:has(.exp-col:nth-child(1):hover) svg circle:nth-of-type(1),
+    .exp-wave-wrapper:has(.exp-col:nth-child(2):hover) svg circle:nth-of-type(2),
+    .exp-wave-wrapper:has(.exp-col:nth-child(3):hover) svg circle:nth-of-type(3),
+    .exp-wave-wrapper:has(.exp-col:nth-child(4):hover) svg circle:nth-of-type(4),
+    .exp-wave-wrapper:has(.exp-col:nth-child(5):hover) svg circle:nth-of-type(5) {
+      fill: var(--text);
+      r: 7;
+      transition: r 200ms ease, fill 200ms ease;
+    }
+    .exp-col .exp-badge,
+    .exp-col .exp-period,
+    .exp-col h3,
+    .exp-col .exp-org,
+    .exp-col .exp-loc,
+    .exp-col .exp-desc {
+      transition: transform 220ms ease, color 220ms ease, opacity 220ms ease;
+    }
+    .exp-col:hover h3,
+    .exp-col:focus-visible h3 { transform: translateX(3px); }
+    .exp-col:hover .exp-desc,
+    .exp-col:focus-visible .exp-desc { color: var(--text); }
     .exp-col:nth-child(2) { margin-top: 26px; }
     .exp-col:nth-child(3) { margin-top: 8px; }
     .exp-col:nth-child(4) { margin-top: 32px; }
     .exp-col:nth-child(5) { margin-top: 12px; }
     @media (max-width: 960px) { .exp-col { margin-top: 0 !important; } }
+    @media (prefers-reduced-motion: reduce) {
+      .exp-col, .exp-col::before, .exp-col * { transition: none !important; }
+      .exp-col:hover, .exp-col:focus-visible { transform: none; }
+    }
 
     .exp-badge {
       display: inline-block;
@@ -1665,7 +1729,7 @@
         </svg>
 
         <div class="exp-grid-5">
-          <div class="exp-col">
+          <div class="exp-col" tabindex="0">
             <span class="exp-badge mono">Current · 1st Sem</span>
             <span class="exp-period mono">2026 – 2027</span>
             <h3>M.Sc. Geography (1-Yr NEP)</h3>
@@ -1674,7 +1738,7 @@
             <p class="exp-desc">Specializing in Remote Sensing, GIS, coastal environmental monitoring, and spatial change assessment.</p>
           </div>
 
-          <div class="exp-col">
+          <div class="exp-col" tabindex="0">
             <span class="exp-badge mono">Graduated</span>
             <span class="exp-period mono">2022 – 2026</span>
             <h3>B.Sc. Geography (Honours)</h3>
@@ -1683,7 +1747,7 @@
             <p class="exp-desc">Hands-on coursework in Landsat &amp; Sentinel-2 NDWI extraction, DEM/SRTM terrain analysis, and thematic mapping.</p>
           </div>
 
-          <div class="exp-col">
+          <div class="exp-col" tabindex="0">
             <span class="exp-badge mono">Field Survey</span>
             <span class="exp-period mono">Jan – Feb 2025</span>
             <h3>Coastal Udupi &amp; Farm Surveys</h3>
@@ -1692,7 +1756,7 @@
             <p class="exp-desc">Surveyed urban/rural coastal morphology, rock formations, tourism, and 15+ agricultural lands using GPS waypoints.</p>
           </div>
 
-          <div class="exp-col">
+          <div class="exp-col" tabindex="0">
             <span class="exp-badge mono">Disaster GIS</span>
             <span class="exp-period mono">Dec 2024 – Jan 2025</span>
             <h3>GIS Flood Disaster Index</h3>
@@ -1701,7 +1765,7 @@
             <p class="exp-desc">Integrated elevation, slope, drainage density, NDWI, rainfall, LULC, and proximity variables for flood vulnerability.</p>
           </div>
 
-          <div class="exp-col">
+          <div class="exp-col" tabindex="0">
             <span class="exp-badge mono">Manuscript</span>
             <span class="exp-period mono">Unpublished Research</span>
             <h3>Electoral Geography Study</h3>
