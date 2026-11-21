@@ -1167,14 +1167,18 @@
       color: var(--text);
       border-top: 1px solid var(--border);
       overflow: hidden;
-      cursor: crosshair;
+      cursor: grab;
+      touch-action: pan-y;
       transition: background-color 0.3s ease, color 0.3s ease;
     }
+    .orbital-stage.is-dragging { cursor: grabbing; }
 
     #earthOrbitalCanvas {
       width: 100%;
       height: 100%;
       display: block;
+      touch-action: pan-y;
+      user-select: none;
     }
 
     .orbital-hud-left {
@@ -2322,7 +2326,50 @@ def compute_flood_vulnerability_overlay(dem_slope, drainage_density, ndwi, proxi
     window.addEventListener('resize', resizeOrbitalCanvas);
     resizeOrbitalCanvas();
 
+    let globeDragging = false;
+    let lastDragX = 0;
+    let lastDragY = 0;
+
+    orbitalStage.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      globeDragging = true;
+      lastDragX = e.clientX;
+      lastDragY = e.clientY;
+      orbitalStage.classList.add('is-dragging');
+      orbitalStage.setPointerCapture(e.pointerId);
+      pointer.hovering = true;
+    });
+
+    orbitalStage.addEventListener('pointermove', (e) => {
+      if (!globeDragging) return;
+      const rect = orbitalStage.getBoundingClientRect();
+      const dx = e.clientX - lastDragX;
+      const dy = e.clientY - lastDragY;
+      lastDragX = e.clientX;
+      lastDragY = e.clientY;
+
+      // Horizontal drag spins the globe; vertical drag tilts it.
+      earthSpin += dx * 0.012;
+      pointer.targetY = Math.max(-1, Math.min(1, pointer.targetY + dy / Math.max(1, rect.height) * 2));
+      pointer.targetX = 0;
+    });
+
+    function stopGlobeDrag(e) {
+      if (!globeDragging) return;
+      globeDragging = false;
+      orbitalStage.classList.remove('is-dragging');
+      pointer.hovering = false;
+      if (e && orbitalStage.hasPointerCapture(e.pointerId)) orbitalStage.releasePointerCapture(e.pointerId);
+    }
+    orbitalStage.addEventListener('pointerup', stopGlobeDrag);
+    orbitalStage.addEventListener('pointercancel', stopGlobeDrag);
+    orbitalStage.addEventListener('lostpointercapture', () => {
+      globeDragging = false;
+      orbitalStage.classList.remove('is-dragging');
+    });
+
     orbitalStage.addEventListener('mousemove', (e) => {
+      if (globeDragging) return;
       const rect = orbitalStage.getBoundingClientRect();
       const nx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
       const ny = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
