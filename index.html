@@ -1,0 +1,2650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chodipilli Vara Prasad | GIS & Remote Sensing</title>
+  <style>
+    :root {
+      --bg: #F4F3EF;
+      --text: #111111;
+      --muted: rgba(17, 17, 17, 0.56);
+      --border: rgba(17, 17, 17, 0.12);
+      --border-strong: rgba(17, 17, 17, 0.34);
+      --folder-back: rgba(224, 222, 214, 0.85);
+      --glass-front: linear-gradient(180deg, rgba(255, 255, 255, 0.58) 0%, rgba(238, 236, 230, 0.78) 100%);
+      --glass-border: rgba(255, 255, 255, 0.72);
+      --sheet-light: #FFFFFF;
+      --sheet-dark: #151619;
+      --pill-bg: rgba(17, 17, 17, 0.045);
+      --btn-bg: #111111;
+      --btn-text: #FFFFFF;
+      --modal-bg: #FFFFFF;
+      --container-max: 1160px;
+    }
+
+    body.dark {
+      --bg: #111111;
+      --text: #F4F3EF;
+      --muted: rgba(244, 243, 239, 0.56);
+      --border: rgba(244, 243, 239, 0.13);
+      --border-strong: rgba(244, 243, 239, 0.36);
+      --folder-back: rgba(34, 34, 34, 0.9);
+      --glass-front: linear-gradient(180deg, rgba(48, 48, 48, 0.55) 0%, rgba(26, 26, 26, 0.78) 100%);
+      --glass-border: rgba(255, 255, 255, 0.16);
+      --sheet-light: #2A2A2A;
+      --sheet-dark: #0A0B0D;
+      --pill-bg: rgba(255, 255, 255, 0.06);
+      --btn-bg: #F4F3EF;
+      --btn-text: #111111;
+      --modal-bg: #181818;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+      line-height: 1.5;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+
+    /* =========================================================
+       PAPER DOT-GRID + EXTENDED CURSOR-SPOTLIGHT GIS CODE BACKDROP
+       ========================================================= */
+    .paper-grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.45;
+      background-image: radial-gradient(rgba(17, 17, 17, 0.065) 1px, transparent 0);
+      background-size: 18px 18px;
+    }
+    body.dark .paper-grain {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0);
+    }
+
+    .top-code-backdrop {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1180px;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+      font-size: 12px;
+      line-height: 1.75;
+      user-select: none;
+    }
+
+    .code-layer {
+      position: absolute;
+      inset: 0;
+      padding: 28px 40px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.55) 75%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.55) 75%, transparent 100%);
+    }
+
+    .code-layer-base {
+      opacity: 0.045;
+    }
+
+    .code-layer-spotlight {
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      --mx: -999px;
+      --my: -999px;
+      mask-image: radial-gradient(
+        215px circle at var(--mx) var(--my),
+        rgba(0, 0, 0, 0.45) 0%,
+        rgba(0, 0, 0, 0.18) 48%,
+        transparent 76%
+      );
+      -webkit-mask-image: radial-gradient(
+        215px circle at var(--mx) var(--my),
+        rgba(0, 0, 0, 0.45) 0%,
+        rgba(0, 0, 0, 0.18) 48%,
+        transparent 76%
+      );
+    }
+
+    .top-code-backdrop.active .code-layer-spotlight {
+      opacity: 1;
+    }
+
+    /* =========================================================
+       FLOATING DARK PILL NAVBAR
+       ========================================================= */
+    .navbar-wrap {
+      position: fixed;
+      top: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 70;
+    }
+
+    .navbar {
+      width: 340px;
+      height: 52px;
+      background: #141414;
+      color: #FFFFFF;
+      padding: 0 8px 0 22px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .navbar a.brand {
+      color: #FFFFFF;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+      display: inline-block;
+    }
+
+    .nav-actions { display: flex; align-items: center; gap: 8px; }
+
+    .theme-btn {
+      width: 36px;
+      height: 36px;
+      background: transparent;
+      border: none;
+      color: #FFFFFF;
+      cursor: pointer;
+      border-radius: 10px;
+      font-size: 15px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.85;
+    }
+    .theme-btn:hover { background: rgba(255, 255, 255, 0.1); opacity: 1; }
+
+    .dots-btn {
+      width: 44px;
+      height: 36px;
+      background: #F4F3EF;
+      color: #111111;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease;
+    }
+    .dots-btn:hover { transform: scale(1.04); }
+
+    /* =========================================================
+       FULL-HEIGHT RIGHT DRAWER MENU WITH SCATTER-LETTER CLOSE
+       ========================================================= */
+    .menu-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 90;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+      display: flex;
+      justify-content: flex-end;
+      padding: 18px;
+    }
+    .menu-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .menu-drawer {
+      width: min(460px, 100%);
+      height: 100%;
+      background: var(--modal-bg);
+      color: var(--text);
+      border-radius: 24px;
+      padding: 28px 34px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: -20px 0 60px rgba(0, 0, 0, 0.22);
+      transform: translateX(40px) scale(0.98);
+      opacity: 0;
+      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+      overflow: hidden;
+    }
+    .menu-overlay.open .menu-drawer {
+      transform: translateX(0) scale(1);
+      opacity: 1;
+    }
+
+    .menu-drawer-top {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+    }
+    .menu-close-label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .menu-close-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #141414;
+      color: #FFFFFF;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-primary-links {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 24px;
+    }
+    .menu-primary-links a {
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      color: var(--text);
+      text-decoration: none;
+      display: inline-block;
+    }
+    .menu-primary-links a:hover { opacity: 0.65; }
+
+    .menu-secondary-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .menu-secondary-links a {
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .menu-secondary-links a:hover { color: var(--text); }
+
+    .menu-drawer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .menu-drawer-bottom a.email {
+      font-size: 12.5px;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .menu-social-circles {
+      display: flex;
+      gap: 8px;
+    }
+    .menu-social-circles a {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #141414;
+      color: #FFFFFF;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .scatter-char {
+      display: inline-block;
+      transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s ease;
+    }
+
+    /* =========================================================
+       MAIN CONTAINER (1160px Reference Width)
+       ========================================================= */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: 132px 32px 112px;
+    }
+
+    section { margin-bottom: 140px; }
+    .section-divider { border-top: 1px solid var(--border); padding-top: 72px; }
+
+    /* =========================================================
+       STAGE 1: SINGLE-ROW HERO
+       ========================================================= */
+    .hero-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 96px;
+    }
+
+    .hero-headline {
+      text-align: center;
+      font-size: clamp(1.75rem, 5.2vw, 4.35rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.04;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .hero-role-pill {
+      margin-top: 20px;
+      padding: 7px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border-strong);
+      background: var(--pill-bg);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    .hero-sub-bar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 36px;
+      padding: 0 12px;
+    }
+
+    .copyright-stamp {
+      font-weight: 900;
+      font-size: clamp(1.5rem, 2.5vw, 2.1rem);
+      letter-spacing: -0.03em;
+    }
+
+    .hero-kicker {
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* =========================================================
+       STAGE 2: 3-COLUMN ABOUT / INTRO SECTION
+       ========================================================= */
+    .about-split {
+      display: grid;
+      grid-template-columns: 1fr 270px 1fr;
+      gap: 44px;
+      align-items: center;
+      padding-top: 32px;
+    }
+
+    @media (max-width: 900px) {
+      .about-split { grid-template-columns: 1fr; text-align: left; }
+    }
+
+    .about-left h2 {
+      font-size: clamp(2.2rem, 3.9vw, 3.1rem);
+      font-weight: 900;
+      letter-spacing: -0.035em;
+      line-height: 1.06;
+      margin-bottom: 16px;
+    }
+
+    .about-left .role-subtitle {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.35;
+      margin-bottom: 24px;
+    }
+    .about-left .role-subtitle span {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .currently-block {
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+      max-width: 295px;
+    }
+    .currently-block .lbl {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .currently-block h4 {
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .currently-block p {
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    .about-center-card {
+      width: 270px;
+      height: 330px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #D8D6D0;
+      box-shadow: 0 20px 44px rgba(0, 0, 0, 0.14);
+      margin: 0 auto;
+      transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .about-center-card:hover {
+      transform: perspective(800px) rotateY(8deg) scale(1.02);
+    }
+    .about-center-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      filter: grayscale(100%) contrast(1.16);
+      display: block;
+    }
+
+    .about-right p {
+      font-size: 18px;
+      line-height: 1.55;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+    .about-right p span.dim {
+      color: var(--muted);
+    }
+
+    .research-focus-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 24px;
+    }
+    .focus-chip {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--pill-bg);
+      color: var(--muted);
+    }
+
+    .cta-dark-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      height: 46px;
+      padding: 0 22px;
+      border-radius: 10px;
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 600;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+    .cta-dark-btn:hover { transform: translateY(-2px); opacity: 0.92; }
+
+    /* =========================================================
+       STAGE 3: GIS TECH STACK
+       ========================================================= */
+    .section-head-split {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 44px;
+    }
+    .section-head-split h2 {
+      font-size: clamp(2.1rem, 3.8vw, 2.9rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+    }
+    .section-head-split p {
+      font-size: 13.5px;
+      color: var(--muted);
+      max-width: 280px;
+    }
+
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+    @media (max-width: 820px) { .grid-3 { grid-template-columns: 1fr; } }
+
+    .stack-col {
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+    }
+    .stack-col h3 { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+    .stack-col .sub { font-size: 12.5px; color: var(--muted); margin: 6px 0 20px; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag {
+      font-size: 12px;
+      padding: 7px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--pill-bg);
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+    .tag.filled {
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      border-color: var(--btn-bg);
+      font-weight: 600;
+    }
+    .tag:hover { transform: translateY(-2px); }
+
+    /* =========================================================
+       STAGE 4: FEATURED GIS PROJECTS — 3D GLASS FOLDERS
+       ========================================================= */
+    .projects-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .projects-header-row h2 {
+      font-size: clamp(2.1rem, 3.8vw, 2.9rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+    }
+    .projects-sub-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+    .projects-sub-row p {
+      font-size: 13.5px;
+      color: var(--muted);
+      max-width: 390px;
+    }
+
+    .filter-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+    .filter-btn {
+      height: 32px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      font-size: 11.5px;
+      cursor: pointer;
+      opacity: 0.72;
+      transition: all 0.2s ease;
+    }
+    .filter-btn:hover { opacity: 1; border-color: var(--border-strong); }
+    .filter-btn.active {
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      border-color: var(--btn-bg);
+      font-weight: 700;
+      opacity: 1;
+    }
+
+    .folders-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 26px;
+    }
+    @media (max-width: 1024px) { .folders-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { .folders-grid { grid-template-columns: 1fr; } }
+
+    .folder-card-wrap {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .folder-trigger {
+      position: relative;
+      width: 100%;
+      height: 234px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      color: var(--text);
+      padding: 0;
+      display: block;
+      perspective: 950px;
+    }
+
+    .folder-back-ear {
+      position: absolute;
+      top: 2px;
+      left: 6px;
+      width: 92px;
+      height: 28px;
+      background: var(--folder-back);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 11px 15px 0 0;
+      z-index: 1;
+      transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .folder-back-body {
+      position: absolute;
+      top: 16px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--folder-back);
+      border: 1px solid var(--border);
+      border-radius: 13px 15px 15px 15px;
+      z-index: 2;
+      overflow: visible;
+      transition: border-color 0.3s ease, box-shadow 0.35s ease;
+    }
+
+    .folder-trigger:hover .folder-back-body {
+      border-color: var(--border-strong);
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.08);
+    }
+
+    .doc-sheet-left {
+      position: absolute;
+      top: -4px;
+      left: 10px;
+      width: 58%;
+      height: 118px;
+      background: var(--sheet-light);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      transform: rotate(-3deg);
+      transform-origin: bottom center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 2;
+    }
+
+    .doc-sheet-right {
+      position: absolute;
+      top: -8px;
+      right: 10px;
+      width: 68%;
+      height: 124px;
+      background: var(--sheet-light);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 11px;
+      transform: rotate(2.4deg);
+      transform-origin: bottom center;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 3;
+      overflow: hidden;
+    }
+
+    .doc-sheet-right.dark-preview {
+      background: var(--sheet-dark);
+      color: #E5E7EB;
+      border-color: rgba(255, 255, 255, 0.14);
+    }
+
+    .mini-ui-bar { display: flex; align-items: center; gap: 4px; margin-bottom: 6px; }
+    .mini-dot { width: 4.5px; height: 4.5px; border-radius: 50%; background: currentColor; opacity: 0.42; }
+    .mini-line { height: 4px; border-radius: 2px; background: currentColor; opacity: 0.16; margin-bottom: 5px; }
+
+    .doc-sheet-front {
+      position: absolute;
+      top: 16px;
+      left: 8px;
+      right: 8px;
+      height: 108px;
+      background: var(--sheet-light);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 11px;
+      transform: rotate(-0.5deg);
+      transform-origin: bottom center;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 4;
+      font-size: 9.5px;
+      color: var(--muted);
+    }
+
+    .folder-trigger:hover .doc-sheet-left {
+      transform: translate(-6px, -28px) rotate(-8.5deg);
+    }
+    .folder-trigger:hover .doc-sheet-right {
+      transform: translate(6px, -34px) rotate(7deg);
+    }
+    .folder-trigger:hover .doc-sheet-front {
+      transform: translateY(-20px) rotate(-1.5deg);
+    }
+
+    .folder-front-pocket {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 142px;
+      z-index: 5;
+      transform-origin: bottom center;
+      transform-style: preserve-3d;
+      transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .folder-trigger:hover .folder-front-pocket {
+      transform: rotateX(-16deg) translateY(2px);
+    }
+
+    .folder-front-tab {
+      position: absolute;
+      top: -16px;
+      left: 0;
+      width: 112px;
+      height: 17px;
+      background: var(--glass-front);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-bottom: none;
+      border-radius: 10px 14px 0 0;
+      z-index: 6;
+    }
+
+    .folder-front-surface {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: var(--glass-front);
+      backdrop-filter: blur(16px) saturate(140%);
+      -webkit-backdrop-filter: blur(16px) saturate(140%);
+      border: 1px solid var(--glass-border);
+      border-radius: 0 14px 14px 14px;
+      padding: 20px 16px 18px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 10px;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.78),
+        0 -6px 18px rgba(0, 0, 0, 0.05),
+        0 12px 26px rgba(0, 0, 0, 0.07);
+      overflow: hidden;
+    }
+
+    .folder-front-surface::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 12px;
+      bottom: 0;
+      width: 18px;
+      background: linear-gradient(90deg, rgba(0, 0, 0, 0.045), rgba(255, 255, 255, 0.28), transparent);
+      pointer-events: none;
+    }
+
+    .folder-title {
+      font-size: 17.5px;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1.15;
+      color: var(--text);
+    }
+
+    .folder-arrow-pill {
+      position: relative;
+      z-index: 2;
+      width: 24px;
+      height: 46px;
+      border-radius: 999px;
+      background: #141414;
+      color: #FFFFFF;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.2s ease;
+    }
+    body.dark .folder-arrow-pill {
+      background: #F4F3EF;
+      color: #111111;
+    }
+    .folder-trigger:hover .folder-arrow-pill {
+      transform: translateY(-3px) scale(1.05);
+    }
+
+    .folder-below-meta {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .folder-below-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .folder-below-link {
+      background: none;
+      border: none;
+      padding: 0;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+    .folder-below-link:hover { text-decoration: underline; }
+
+    /* =========================================================
+       STAGE 5: HORIZONTAL CURVED SVG WAVE EXPERIENCE & EDUCATION TIMELINE
+       ========================================================= */
+    .exp-wave-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .exp-svg-track {
+      width: 100%;
+      height: 84px;
+      display: block;
+      overflow: visible;
+    }
+
+    .exp-wave-path {
+      fill: none;
+      stroke: var(--border-strong);
+      stroke-width: 1.5;
+      stroke-dasharray: 1200;
+      stroke-dashoffset: 1200;
+      transition: stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .exp-wave-wrapper.in-view .exp-wave-path {
+      stroke-dashoffset: 0;
+    }
+
+    .exp-grid-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 24px;
+      margin-top: 8px;
+    }
+    @media (max-width: 960px) {
+      .exp-svg-track { display: none; }
+      .exp-grid-5 { grid-template-columns: 1fr; gap: 28px; }
+    }
+
+    .exp-col {
+      position: relative;
+      padding-top: 6px;
+    }
+    .exp-col:nth-child(2) { margin-top: 26px; }
+    .exp-col:nth-child(3) { margin-top: 8px; }
+    .exp-col:nth-child(4) { margin-top: 32px; }
+    .exp-col:nth-child(5) { margin-top: 12px; }
+    @media (max-width: 960px) { .exp-col { margin-top: 0 !important; } }
+
+    .exp-badge {
+      display: inline-block;
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 5px;
+      margin-bottom: 6px;
+    }
+    .exp-period {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .exp-col h3 {
+      font-size: 17px;
+      font-weight: 800;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+    .exp-org {
+      font-size: 12.5px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .exp-loc {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .exp-desc {
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* =========================================================
+       STAGE 6: CONTACT SECTION
+       ========================================================= */
+    .contact-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 56px; }
+    @media (max-width: 760px) { .contact-grid { grid-template-columns: 1fr; gap: 36px; } }
+
+    .contact-left h2 {
+      font-size: clamp(2.2rem, 4vw, 3rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+    .contact-left p {
+      font-size: 14.5px;
+      color: var(--muted);
+      max-width: 360px;
+      margin-bottom: 24px;
+    }
+    .email-copy-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14.5px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .email-copy-row a { color: var(--text); text-decoration: none; }
+    .copy-icon-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 7px;
+      font-size: 11px;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    .contact-phone-row {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .social-pills { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; }
+    .social-pills a { color: var(--muted); text-decoration: none; }
+    .social-pills a:hover { color: var(--text); }
+
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 560px) { .form-row-2 { grid-template-columns: 1fr; } }
+
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border-strong);
+      padding: 8px 0;
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+    }
+    .submit-btn {
+      height: 44px;
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      border: none;
+      padding: 0 22px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* =========================================================
+       STAGE 7: DARK UPPER FOOTER + THEME-MATCHED ORBITAL SATELLITE STAGE
+       ========================================================= */
+    footer {
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .footer-dark-top {
+      background: #0B0B0B;
+      color: #F4F3EF;
+      padding-top: 72px;
+    }
+
+    .footer-inner {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: 0 32px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1.2fr 1fr;
+      gap: 40px;
+      margin-bottom: 48px;
+    }
+    @media (max-width: 760px) { .footer-grid { grid-template-columns: 1fr; } }
+
+    .footer-brand h3 { font-size: 24px; font-weight: 900; letter-spacing: -0.02em; color: #F4F3EF; }
+    .footer-brand p { font-size: 13px; color: rgba(244, 243, 239, 0.56); margin-top: 6px; max-width: 280px; }
+
+    .footer-col h4 {
+      font-size: 11px;
+      color: rgba(244, 243, 239, 0.45);
+      margin-bottom: 14px;
+    }
+    .footer-explore-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 18px;
+      max-width: 280px;
+    }
+    .footer-explore-links a,
+    .footer-col a {
+      color: #F4F3EF;
+      text-decoration: none;
+      font-size: 13px;
+      opacity: 0.85;
+    }
+    .footer-explore-links a:hover,
+    .footer-col a:hover { opacity: 1; text-decoration: underline; }
+
+    .footer-see-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding: 24px 0 40px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .footer-see-row h2 {
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: #F4F3EF;
+    }
+    .back-top-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #F4F3EF;
+      text-decoration: none;
+      font-size: 12.5px;
+      transition: background-color 0.2s ease;
+    }
+    .back-top-pill:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    /* Interactive Orbital Earth & Satellite Telemetry Stage (Theme-Matched) */
+    .orbital-stage {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      background: var(--bg);
+      color: var(--text);
+      border-top: 1px solid var(--border);
+      overflow: hidden;
+      cursor: crosshair;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    #earthOrbitalCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .orbital-hud-left {
+      position: absolute;
+      top: 18px;
+      left: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      pointer-events: none;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .orbital-hud-left strong {
+      color: var(--text);
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+
+    .orbital-hud-right {
+      position: absolute;
+      bottom: 18px;
+      left: 32px;
+      right: 32px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      pointer-events: none;
+      font-size: 10.5px;
+      color: var(--muted);
+    }
+
+    .sat-chip {
+      padding: 4px 9px;
+      border-radius: 6px;
+      background: var(--pill-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sat-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text);
+    }
+
+    .sat-dot.indian {
+      background: #D97706;
+      box-shadow: 0 0 6px rgba(217, 119, 6, 0.65);
+    }
+    body.dark .sat-dot.indian {
+      background: #FACC15;
+      box-shadow: 0 0 8px #FACC15;
+    }
+
+    /* =========================================================
+       SPRING-ANIMATED FOLDER CASE STUDY MODAL + SPATIAL MAP TAB
+       ========================================================= */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.58);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.28s ease;
+    }
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-folder-shell {
+      max-width: 620px;
+      width: 100%;
+      padding-top: 28px;
+      position: relative;
+      transform: translateY(24px) scale(0.94);
+      opacity: 0;
+      transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+    }
+    .modal-backdrop.open .modal-folder-shell {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .modal-folder-tab {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 30px;
+      padding: 0 18px 0 14px;
+      background: var(--modal-bg);
+      border: 1px solid var(--border-strong);
+      border-bottom: none;
+      border-radius: 10px 14px 0 0;
+      font-size: 11px;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .modal-box {
+      background: var(--modal-bg);
+      color: var(--text);
+      border: 1px solid var(--border-strong);
+      border-radius: 0 16px 16px 16px;
+      width: 100%;
+      padding: 28px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .modal-top h3 { font-size: 26px; font-weight: 900; margin-top: 4px; letter-spacing: -0.02em; }
+
+    .close-btn {
+      background: transparent;
+      border: 1px solid var(--border-strong);
+      color: var(--text);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      cursor: pointer;
+    }
+
+    .modal-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 18px;
+    }
+    .modal-tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--muted);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .modal-tab-btn.active {
+      background: var(--pill-bg);
+      border-color: var(--border);
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .modal-overview { font-size: 14.5px; opacity: 0.9; line-height: 1.65; }
+    .modal-list { list-style: none; font-size: 14px; opacity: 0.9; }
+    .modal-list li { margin-bottom: 10px; padding-left: 16px; position: relative; }
+    .modal-list li::before { content: "→"; position: absolute; left: 0; color: var(--muted); }
+
+    .map-panel {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--pill-bg);
+    }
+
+    .map-viewport {
+      position: relative;
+      width: 100%;
+      height: 215px;
+      background: #EAE8E1;
+      overflow: hidden;
+    }
+    body.dark .map-viewport {
+      background: #1A1C1E;
+    }
+
+    .map-viewport svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .map-hud-top {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .map-pill {
+      background: rgba(20, 20, 20, 0.86);
+      color: #FFFFFF;
+      font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      backdrop-filter: blur(6px);
+    }
+
+    .map-meta-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    .map-meta-bar strong {
+      color: var(--text);
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .modal-links { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-solid {
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      text-decoration: none;
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .btn-ghost {
+      border: 1px solid var(--border-strong);
+      color: var(--text);
+      text-decoration: none;
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="paper-grain"></div>
+
+  <!-- Interactive Cursor-Spotlight GIS Code Backdrop (Extended Through Introduction) -->
+  <div class="top-code-backdrop mono" id="gisCodeBackdrop">
+    <div class="code-layer code-layer-base" id="gisCodeBase"></div>
+    <div class="code-layer code-layer-spotlight" id="gisCodeSpotlight"></div>
+  </div>
+
+  <!-- Floating Pill Navbar -->
+  <div class="navbar-wrap">
+    <nav class="navbar">
+      <a href="#top" class="brand">Vara Prasad</a>
+      <div class="nav-actions">
+        <button id="themeToggle" class="theme-btn" aria-label="Toggle theme">☾</button>
+        <button id="menuToggle" class="dots-btn" aria-label="Open navigation menu">•••</button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Full-Height Drawer Menu with Scatter-Letter Close Animation -->
+  <div id="menuOverlay" class="menu-overlay" aria-hidden="true">
+    <div class="menu-drawer" id="menuDrawer">
+      <div class="menu-drawer-top">
+        <span class="menu-close-label mono">close</span>
+        <button id="menuCloseBtn" class="menu-close-circle" aria-label="Close menu">✕</button>
+      </div>
+
+      <div>
+        <nav class="menu-primary-links" id="scatterLinks">
+          <a href="#projects" data-scatter>Projects</a>
+          <a href="#about" data-scatter>About</a>
+          <a href="#contact" data-scatter>Contact</a>
+        </nav>
+
+        <nav class="menu-secondary-links" id="scatterSubLinks">
+          <a href="#skills" data-scatter>GIS &amp; RS Stack</a>
+          <a href="#experience" data-scatter>Education &amp; Fieldwork</a>
+          <a href="#projects" data-scatter>Spatial Analysis</a>
+        </nav>
+      </div>
+
+      <div class="menu-drawer-bottom">
+        <a href="mailto:varaprasad501501@gmail.com" class="email mono" data-scatter>varaprasad501501@gmail.com</a>
+        <div class="menu-social-circles">
+          <a href="https://www.linkedin.com/in/vara-prasad-ba0297252" target="_blank" rel="noreferrer" aria-label="LinkedIn">IN</a>
+          <a href="#projects" aria-label="GIS Projects">GIS</a>
+          <a href="#experience" aria-label="Education">CUK</a>
+          <a href="tel:+919963240907" aria-label="Call">+91</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main id="top">
+    <!-- Stage 1: Single-Row Hero -->
+    <section class="hero-stage">
+      <h1 class="hero-headline">&lt; VARA PRASAD /&gt;</h1>
+      <div class="hero-role-pill mono">Chodipilli Vara Prasad · M.Sc. Geography | Remote Sensing &amp; GIS</div>
+
+      <div class="hero-sub-bar">
+        <span class="copyright-stamp">©2026</span>
+        <span class="hero-kicker mono">{{ /COASTAL MONITORING · FLOOD VULNERABILITY · SPATIAL ANALYSIS }}</span>
+      </div>
+    </section>
+
+    <!-- Stage 2: 3-Column About / Intro Layout -->
+    <section id="about" class="about-split">
+      <div class="about-left">
+        <h2>Hi, I'm<br />Vara Prasad.</h2>
+        <p class="role-subtitle">
+          Chodipilli Vara Prasad<br />
+          <span>(M.Sc. Geography · Remote Sensing &amp; GIS)</span>
+        </p>
+
+        <div class="currently-block">
+          <div class="lbl mono">Academic Base · 2026–2027</div>
+          <h4>Central University of Karnataka</h4>
+          <p>M.Sc. Geography 1-Year Program (NEP) · 1st Sem</p>
+          <p>B.Sc. Geography with Honours (2022–2026)</p>
+        </div>
+      </div>
+
+      <div class="about-center-card">
+        <img src="Linkdin.jpeg" alt="Chodipilli Vara Prasad Portrait" />
+      </div>
+
+      <div class="about-right">
+        <p>
+          <strong>I analyze Landsat &amp; Sentinel-2 satellite imagery and field GPS datasets</strong>
+          <span class="dim">for</span>
+          <strong>coastal environmental monitoring, flood disaster mitigation, and thematic mapping</strong><span class="dim"> using ArcGIS Pro and QGIS.</span>
+        </p>
+
+        <div class="research-focus-pills mono">
+          <span class="focus-chip">Coastal &amp; Marine Geography</span>
+          <span class="focus-chip">NDWI Water Extraction</span>
+          <span class="focus-chip">Urban Morphology</span>
+          <span class="focus-chip">Flood Disaster Index</span>
+        </div>
+
+        <a href="#projects" class="cta-dark-btn">Explore GIS &amp; field projects ↗</a>
+      </div>
+    </section>
+
+    <!-- Stage 3: GIS, Remote Sensing & Statistical Stack -->
+    <section id="skills" class="section-divider">
+      <div class="section-head-split">
+        <h2>GIS &amp; Spatial Stack</h2>
+        <p>Remote sensing, spatial analysis, statistical modeling, and field surveying tools.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="stack-col">
+          <h3>GIS &amp; Spatial<br />Analysis</h3>
+          <p class="sub">Overlay, Proximity, Network Analysis, Georeferencing &amp; Cartography</p>
+          <div class="tags mono">
+            <span class="tag filled">ArcGIS Pro</span>
+            <span class="tag filled">QGIS</span>
+            <span class="tag">Google Earth Pro</span>
+            <span class="tag">Raster &amp; Vector Analysis</span>
+            <span class="tag">Spatial Overlay</span>
+            <span class="tag">Proximity / Buffer</span>
+            <span class="tag">Network Analysis</span>
+            <span class="tag">Digitization</span>
+            <span class="tag">Thematic Mapping</span>
+          </div>
+        </div>
+
+        <div class="stack-col">
+          <h3>Remote Sensing<br />&amp; Terrain</h3>
+          <p class="sub">Spectral Indices, NDWI Water Extraction, LULC &amp; DEM/SRTM Modeling</p>
+          <div class="tags mono">
+            <span class="tag filled">Landsat Data</span>
+            <span class="tag filled">Sentinel-2 / NDWI</span>
+            <span class="tag">ESA SNAP</span>
+            <span class="tag">LULC Classification</span>
+            <span class="tag">Change Detection</span>
+            <span class="tag">DEM / SRTM Analysis</span>
+            <span class="tag">Spectral Indices</span>
+            <span class="tag">Image Preprocessing</span>
+          </div>
+        </div>
+
+        <div class="stack-col">
+          <h3>Statistics, Field<br />&amp; Scripting</h3>
+          <p class="sub">GPS Waypoints, Regression Analysis, Technical Reporting &amp; Python</p>
+          <div class="tags mono">
+            <span class="tag filled">IBM SPSS</span>
+            <span class="tag filled">GPS Waypoints</span>
+            <span class="tag">Microsoft Excel</span>
+            <span class="tag">Correlation &amp; Regression</span>
+            <span class="tag">Python Basics</span>
+            <span class="tag">Adobe Photoshop</span>
+            <span class="tag">After Effects</span>
+            <span class="tag">EN · HI · TE</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stage 4: Featured Research & Field Projects (4-Column 3D Glass Folders) -->
+    <section id="projects" class="section-divider">
+      <div class="projects-header-row">
+        <h2>Research &amp;<br />Field Projects</h2>
+        <a href="https://www.linkedin.com/in/vara-prasad-ba0297252" target="_blank" rel="noreferrer" class="filter-btn mono" style="display:inline-flex;align-items:center;text-decoration:none;">LinkedIn ↗</a>
+      </div>
+
+      <div class="projects-sub-row">
+        <p>Disaster mitigation, coastal morphology surveys, electoral spatial patterns, and agricultural field research.</p>
+        <div id="filterTabs" class="filter-tabs" role="tablist"></div>
+      </div>
+
+      <div id="projectsGrid" class="folders-grid"></div>
+    </section>
+
+    <!-- Stage 5: Horizontal Curved SVG Wave Education & Experience Timeline -->
+    <section id="experience" class="section-divider">
+      <div class="section-head-split">
+        <h2>Education &amp;<br />Field Experience.</h2>
+        <p>Central University of Karnataka, Indian Red Cross Society &amp; Field Campaigns.</p>
+      </div>
+
+      <div class="exp-wave-wrapper" id="expWaveSection">
+        <svg class="exp-svg-track" viewBox="0 0 1100 84" preserveAspectRatio="none">
+          <path
+            class="exp-wave-path"
+            d="M 24 24 C 120 24, 150 62, 246 62 C 340 62, 375 28, 468 28 C 565 28, 600 66, 690 66 C 785 66, 820 30, 912 30 C 990 30, 1030 42, 1076 42"
+          />
+          <circle cx="24" cy="24" r="5.5" fill="var(--text)" />
+          <circle cx="246" cy="62" r="4.5" fill="var(--bg)" stroke="var(--text)" stroke-width="2" />
+          <circle cx="468" cy="28" r="4.5" fill="var(--bg)" stroke="var(--text)" stroke-width="2" />
+          <circle cx="690" cy="66" r="4.5" fill="var(--bg)" stroke="var(--text)" stroke-width="2" />
+          <circle cx="912" cy="30" r="4.5" fill="var(--bg)" stroke="var(--text)" stroke-width="2" />
+        </svg>
+
+        <div class="exp-grid-5">
+          <div class="exp-col">
+            <span class="exp-badge mono">Current · 1st Sem</span>
+            <span class="exp-period mono">2026 – 2027</span>
+            <h3>M.Sc. Geography (1-Yr NEP)</h3>
+            <div class="exp-org">Central University of Karnataka</div>
+            <div class="exp-loc">Kalaburagi, Karnataka</div>
+            <p class="exp-desc">Specializing in Remote Sensing, GIS, coastal environmental monitoring, and spatial change assessment.</p>
+          </div>
+
+          <div class="exp-col">
+            <span class="exp-badge mono">Graduated</span>
+            <span class="exp-period mono">2022 – 2026</span>
+            <h3>B.Sc. Geography (Honours)</h3>
+            <div class="exp-org">Central University of Karnataka</div>
+            <div class="exp-loc">Kalaburagi, Karnataka</div>
+            <p class="exp-desc">Hands-on coursework in Landsat &amp; Sentinel-2 NDWI extraction, DEM/SRTM terrain analysis, and thematic mapping.</p>
+          </div>
+
+          <div class="exp-col">
+            <span class="exp-badge mono">Field Survey</span>
+            <span class="exp-period mono">Jan – Feb 2025</span>
+            <h3>Coastal Udupi &amp; Farm Surveys</h3>
+            <div class="exp-org">Central University of Karnataka</div>
+            <div class="exp-loc">Udupi &amp; Kalaburagi, Karnataka</div>
+            <p class="exp-desc">Surveyed urban/rural coastal morphology, rock formations, tourism, and 15+ agricultural lands using GPS waypoints.</p>
+          </div>
+
+          <div class="exp-col">
+            <span class="exp-badge mono">Disaster GIS</span>
+            <span class="exp-period mono">Dec 2024 – Jan 2025</span>
+            <h3>GIS Flood Disaster Index</h3>
+            <div class="exp-org">Indian Red Cross Society</div>
+            <div class="exp-loc">Nellore, Andhra Pradesh</div>
+            <p class="exp-desc">Integrated elevation, slope, drainage density, NDWI, rainfall, LULC, and proximity variables for flood vulnerability.</p>
+          </div>
+
+          <div class="exp-col">
+            <span class="exp-badge mono">Manuscript</span>
+            <span class="exp-period mono">Unpublished Research</span>
+            <h3>Electoral Geography Study</h3>
+            <div class="exp-org">Spatial Research Work</div>
+            <div class="exp-loc">Andhra Pradesh, India</div>
+            <p class="exp-desc">Conducted GIS-based spatial analysis and thematic mapping of electoral patterns and regional variations.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stage 6: Contact -->
+    <section id="contact" class="section-divider" style="margin-bottom:0;">
+      <div class="contact-grid">
+        <div class="contact-left">
+          <h2>Let's talk.</h2>
+          <p>Open to Remote Sensing &amp; GIS internships, coastal environmental research, and geospatial field projects.</p>
+
+          <div class="email-copy-row">
+            <a href="mailto:varaprasad501501@gmail.com">varaprasad501501@gmail.com</a>
+            <span style="font-size:12px;">↗</span>
+            <button type="button" id="copyEmailBtn" class="copy-icon-btn mono" title="Copy email">📋</button>
+          </div>
+
+          <div class="contact-phone-row mono">
+            📞 +91 99632 40907 · Andhra Pradesh &amp; Kalaburagi, IN
+          </div>
+
+          <div class="social-pills mono">
+            <a href="https://www.linkedin.com/in/vara-prasad-ba0297252" target="_blank" rel="noreferrer">LinkedIn ↗</a>
+            <a href="#projects">Flood Disaster Index</a>
+            <a href="#projects">Coastal Udupi Survey</a>
+            <a href="#skills">ArcGIS Pro &amp; QGIS</a>
+          </div>
+        </div>
+
+        <form id="contactForm">
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="name">Your name</label>
+              <input id="name" type="text" placeholder="What should I call you?" />
+            </div>
+            <div class="form-group">
+              <label for="email">Email address</label>
+              <input id="email" type="email" placeholder="you@organization.com" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="message">What GIS project, internship, or field study do you have in mind?</label>
+            <textarea id="message" rows="3" placeholder="Tell me about your organization, study area, or geospatial role…"></textarea>
+          </div>
+
+          <button type="submit" class="submit-btn">Create email draft ↗</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Stage 7: Dark Upper Footer + Theme-Matched Orbital Earth & Indian/Global Satellites -->
+  <footer>
+    <div class="footer-dark-top">
+      <div class="footer-inner">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <h3>Chodipilli Vara Prasad.</h3>
+            <p>M.Sc. Geography | Remote Sensing &amp; GIS · Central University of Karnataka.</p>
+          </div>
+
+          <div class="footer-col">
+            <h4>Explore</h4>
+            <div class="footer-explore-links">
+              <a href="#about">About</a>
+              <a href="#skills">GIS Stack</a>
+              <a href="#projects">Projects</a>
+              <a href="#experience">Education</a>
+              <a href="#projects">Spatial Maps</a>
+              <a href="#contact">Contact</a>
+            </div>
+          </div>
+
+          <div class="footer-col">
+            <h4>Get in touch</h4>
+            <ul style="list-style:none;">
+              <li><a href="mailto:varaprasad501501@gmail.com">varaprasad501501@gmail.com ↗</a></li>
+              <li style="margin-top:4px;"><a href="tel:+919963240907">+91 99632 40907</a></li>
+              <li style="font-size:11.5px; color:rgba(244,243,239,0.5); margin-top:6px;">© 2026 Chodipilli Vara Prasad · Andhra Pradesh / Kalaburagi, IN</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="footer-see-row">
+          <h2>See you around.</h2>
+          <a href="#top" class="back-top-pill mono">Back to top ↑</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Cursor-Responsive Earth & Satellite Constellation Stage -->
+    <div class="orbital-stage" id="orbitalStage">
+      <div class="orbital-hud-left mono">
+        <strong>INDIAN CONSTELLATION &amp; EO SATELLITES</strong>
+        <span id="orbitalCoordsReadout">17.3297° N, 76.8343° E · EPSG:4326</span>
+      </div>
+
+      <canvas id="earthOrbitalCanvas"></canvas>
+
+      <div class="orbital-hud-right mono">
+        <span class="sat-chip"><span class="sat-dot indian"></span> NAVIC-1I (IRNSS)</span>
+        <span class="sat-chip"><span class="sat-dot indian"></span> CARTOSAT-3 (ISRO)</span>
+        <span class="sat-chip"><span class="sat-dot indian"></span> RESOURCESAT-2A</span>
+        <span class="sat-chip"><span class="sat-dot indian"></span> RISAT-2B (SAR)</span>
+        <span class="sat-chip"><span class="sat-dot indian"></span> NISAR (NASA-ISRO)</span>
+        <span class="sat-chip"><span class="sat-dot"></span> LANDSAT-9</span>
+        <span class="sat-chip"><span class="sat-dot"></span> SENTINEL-2A</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Interactive Frosted Glass Folder Modal with Spatial / Map Section -->
+  <div id="projectModal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-folder-shell">
+      <div id="modalTabLabel" class="modal-folder-tab mono"></div>
+      <div class="modal-box">
+        <div class="modal-top">
+          <div>
+            <p id="modalMeta" class="mono" style="font-size:11.5px; color:var(--muted); text-transform:uppercase;"></p>
+            <h3 id="modalTitle"></h3>
+          </div>
+          <button id="closeModalBtn" class="close-btn mono">ESC ✕</button>
+        </div>
+
+        <div class="modal-tabs mono">
+          <button type="button" class="modal-tab-btn active" data-tab="overview">01. Overview</button>
+          <button type="button" class="modal-tab-btn" data-tab="highlights">02. Methodology &amp; Findings</button>
+          <button type="button" class="modal-tab-btn" data-tab="stack">03. GIS &amp; Field Tools</button>
+          <button type="button" class="modal-tab-btn" data-tab="map">04. Spatial / Map</button>
+        </div>
+
+        <div id="modalBody"></div>
+
+        <div class="modal-footer">
+          <div class="modal-links">
+            <a id="modalLive" href="#" target="_blank" rel="noreferrer" class="btn-solid">Connect on LinkedIn ↗</a>
+            <a id="modalRepo" href="mailto:varaprasad501501@gmail.com" class="btn-ghost mono">Request Report ↗</a>
+          </div>
+          <button id="closeModalText" style="background:none;border:none;color:var(--text);text-decoration:underline;font-size:12px;cursor:pointer;" class="mono">
+            Close folder
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================
+       1. EXTENDED CURSOR-SPOTLIGHT GIS CODE BACKDROP
+       ========================================================= */
+    const GIS_CODE_LEFT = `const spatialWorkflow = {
+  researcher: "Chodipilli Vara Prasad",
+  program: "M.Sc. Geography | Remote Sensing & GIS",
+  institution: "Central University of Karnataka",
+  crs: { geographic: "EPSG:4326", projected: "EPSG:32643" },
+  floodDisasterIndex: {
+    studyArea: "Nellore, Andhra Pradesh (Indian Red Cross Society)",
+    parameters: [
+      "Elevation & Slope (SRTM DEM)",
+      "Drainage Density & River Proximity",
+      "Sentinel-2 NDWI Water Extraction",
+      "Rainfall, LULC & Population Density"
+    ]
+  }
+};
+
+// Sentinel-2 NDWI Water Extraction & Flood Extent Workflow
+var s2 = ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
+  .filterBounds(nelloreROI)
+  .filter(ee.Filter.lt("CLOUDY_PIXEL_PERCENTAGE", 10))
+  .median()
+  .clip(nelloreROI);
+
+var ndwi = s2.normalizedDifference(["B3", "B8"]).rename("NDWI");
+var waterMask = ndwi.gt(0.15);`;
+
+    const GIS_CODE_RIGHT = `import geopandas as gpd
+import rasterio
+
+def compute_flood_vulnerability_overlay(dem_slope, drainage_density, ndwi, proximity_gdf):
+    """
+    Multi-criteria weighted spatial overlay for Nellore Flood Disaster Index
+    & Kalaburagi / Udupi GPS waypoint georeferencing.
+    """
+    projected = proximity_gdf.to_crs(epsg=32643)  # WGS 84 / UTM Zone 43N
+    river_buffer = projected.geometry.buffer(500)
+    return {
+        "crs": "EPSG:32643",
+        "waypoints_verified": len(projected),
+        "buffer_area_km2": round(river_buffer.area.sum() / 1e6, 3)
+    }
+
+# Field GPS Waypoints & Thematic Mapping Pipeline
+# - Coastal Karnataka, Udupi: Urban & rural morphology + rock formations
+# - Kalaburagi District: 15+ agricultural lands, crop cycles & soil survey
+# - Andhra Pradesh: Electoral geography spatial distribution analysis`;
+
+    const gisMarkup = `<pre>${GIS_CODE_LEFT}</pre><pre>${GIS_CODE_RIGHT}</pre>`;
+    const gisBackdrop = document.getElementById('gisCodeBackdrop');
+    const gisBase = document.getElementById('gisCodeBase');
+    const gisSpotlight = document.getElementById('gisCodeSpotlight');
+
+    gisBase.innerHTML = gisMarkup;
+    gisSpotlight.innerHTML = gisMarkup;
+
+    document.addEventListener('mousemove', (e) => {
+      const rect = gisBackdrop.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      if (y >= 0 && y <= rect.height) {
+        gisBackdrop.classList.add('active');
+        gisSpotlight.style.setProperty('--mx', `${x}px`);
+        gisSpotlight.style.setProperty('--my', `${y}px`);
+      } else {
+        gisBackdrop.classList.remove('active');
+      }
+    });
+
+    document.addEventListener('mouseleave', () => {
+      gisBackdrop.classList.remove('active');
+    });
+
+    /* =========================================================
+       2. REAL CV RESEARCH & FIELD PROJECTS (4 GLASS FOLDERS)
+       ========================================================= */
+    const CATEGORIES = ['All', 'GIS & Remote Sensing', 'Field Survey & Spatial'];
+
+    const PROJECTS = [
+      {
+        id: 'flood-disaster-index-nellore',
+        title: 'GIS-Based Flood<br/>Disaster Index',
+        plainTitle: 'GIS-Based Flood Disaster Index',
+        folderLabel: 'Indian Red Cross Society',
+        category: 'GIS & Remote Sensing',
+        role: 'Disaster Management & Mitigation',
+        year: 'Dec 2024 – Jan 2025',
+        darkSheet: false,
+        sheetHeader: 'Nellore · ArcGIS Pro, QGIS & NDWI',
+        belowLeft: 'Indian Red Cross Society · Nellore',
+        belowRight: '',
+        ctaText: 'Read spatial study ↗',
+        overview: 'Developed a comprehensive GIS-based Flood Disaster Index for Nellore with the Indian Red Cross Society, integrating elevation, slope, drainage density, rainfall, land use/land cover, population, river/road proximity, Sentinel-2 NDWI, and flood-extent variables.',
+        highlights: [
+          'Applied ArcGIS Pro and QGIS for multi-criteria spatial overlay, raster/vector analysis, digitization, proximity, and network analysis.',
+          'Assisted in disaster preparedness field surveys with vulnerable farming communities and mapped agricultural resource accessibility via GPS.',
+          'Prepared thematic maps and spatial vulnerability outputs for local disaster-management planning.'
+        ],
+        stack: ['ArcGIS Pro', 'QGIS', 'Sentinel-2 NDWI', 'DEM / SRTM', 'Spatial Overlay', 'GPS'],
+        liveUrl: 'https://www.linkedin.com/in/vara-prasad-ba0297252',
+        repoUrl: 'mailto:varaprasad501501@gmail.com?subject=Inquiry%20regarding%20GIS-Based%20Flood%20Disaster%20Index',
+        mapData: {
+          region: 'Nellore District, Andhra Pradesh',
+          coords: '14.4426° N, 79.9865° E',
+          crs: 'EPSG:32644 · UTM Zone 44N',
+          layerType: 'Raster + Vector · Flood Vulnerability Index',
+          points: [
+            { x: 135, y: 124, label: 'Pennar River Buffer' },
+            { x: 285, y: 80, label: 'High NDWI Flood Zone' },
+            { x: 430, y: 138, label: 'Agricultural Cluster' }
+          ]
+        }
+      },
+      {
+        id: 'coastal-udupi-morphology',
+        title: 'Coastal Udupi<br/>Morphology',
+        plainTitle: 'Urban & Rural Morphological Analysis — Coastal Udupi',
+        folderLabel: 'Coastal field survey',
+        category: 'Field Survey & Spatial',
+        role: 'Central University of Karnataka',
+        year: 'Jan – Feb 2025',
+        darkSheet: true,
+        sheetHeader: 'Coastal Karnataka · GPS & Georeferencing',
+        belowLeft: 'Udupi Coast · Field Survey',
+        belowRight: 'View map ↗',
+        ctaText: '',
+        overview: 'Conducted empirical field surveys analyzing urban and rural settlement morphology, coastal rock formations, and tourism patterns across coastal Udupi, Karnataka.',
+        highlights: [
+          'Collected precision GPS waypoints and georeferenced field observations across coastal and rural transects.',
+          'Documented coastal geological rock formations and shoreline land-use transitions through empirical field observations.',
+          'Executed a structured tourism survey and integrated field datasets into GIS thematic layers.'
+        ],
+        stack: ['GPS Waypoints', 'QGIS', 'Georeferencing', 'Field Survey', 'Thematic Mapping'],
+        liveUrl: 'https://www.linkedin.com/in/vara-prasad-ba0297252',
+        repoUrl: 'mailto:varaprasad501501@gmail.com?subject=Inquiry%20regarding%20Coastal%20Udupi%20Field%20Survey',
+        mapData: {
+          region: 'Coastal Udupi, Karnataka',
+          coords: '13.3409° N, 74.7421° E',
+          crs: 'EPSG:4326 · WGS 84',
+          layerType: 'GPS Waypoints + Morphological Transects',
+          points: [
+            { x: 125, y: 92, label: 'Malpe Coast' },
+            { x: 275, y: 126, label: 'Udupi Urban Core' },
+            { x: 425, y: 86, label: 'Coastal Rock Outcrop' }
+          ]
+        }
+      },
+      {
+        id: 'electoral-geography-ap',
+        title: 'Electoral Geography<br/>of Andhra Pradesh',
+        plainTitle: 'Electoral Geography of Andhra Pradesh',
+        folderLabel: 'Research manuscript',
+        category: 'GIS & Remote Sensing',
+        role: 'Spatial Research Work (Unpublished)',
+        year: '2025 – 2026',
+        darkSheet: false,
+        sheetHeader: 'Andhra Pradesh · Spatial & Thematic GIS',
+        belowLeft: 'Research Manuscript · GIS',
+        belowRight: 'View map ↗',
+        ctaText: '',
+        overview: 'Conducted GIS-based spatial analysis of electoral patterns, constituency boundaries, and regional voting variations across Andhra Pradesh for an academic research manuscript.',
+        highlights: [
+          'Applied spatial pattern analysis and thematic choropleth cartography to examine geographical distributions of electoral outcomes.',
+          'Joined multi-cycle electoral datasets with administrative vector shapefiles in ArcGIS Pro and QGIS.',
+          'Produced publication-grade analytical GIS maps and statistical summaries using IBM SPSS and Excel.'
+        ],
+        stack: ['ArcGIS Pro', 'QGIS', 'Thematic Mapping', 'IBM SPSS', 'Vector Analysis'],
+        liveUrl: 'https://www.linkedin.com/in/vara-prasad-ba0297252',
+        repoUrl: 'mailto:varaprasad501501@gmail.com?subject=Inquiry%20regarding%20Electoral%20Geography%20Research',
+        mapData: {
+          region: 'Andhra Pradesh · Constituency Polygons',
+          coords: '15.9129° N, 79.7400° E',
+          crs: 'EPSG:4326 · WGS 84',
+          layerType: 'MultiPolygon · Spatial Electoral Distribution',
+          points: [
+            { x: 145, y: 142, label: 'Rayalaseema Cluster' },
+            { x: 295, y: 102, label: 'Coastal Corridor' },
+            { x: 440, y: 68, label: 'North Coastal Zone' }
+          ]
+        }
+      },
+      {
+        id: 'agricultural-field-kalaburagi',
+        title: 'Agricultural Land<br/>& Crop Survey',
+        plainTitle: 'Agricultural Field Survey & QGIS Mapping',
+        folderLabel: 'Field investigator report',
+        category: 'Field Survey & Spatial',
+        role: 'Agricultural Field Surveyor · Academic Report',
+        year: 'Jan – Feb 2025',
+        darkSheet: true,
+        sheetHeader: 'Kalaburagi District · 15+ Farm Plots',
+        belowLeft: 'Kalaburagi · QGIS & GPS',
+        belowRight: 'View map ↗',
+        ctaText: '',
+        overview: 'Conducted comprehensive field surveys across 15+ agricultural lands in Kalaburagi district, collecting GPS coordinates and documenting crop cycles, irrigation methods, and soil conditions.',
+        highlights: [
+          'Captured farm boundary GPS coordinates and georeferenced field observations using field instruments.',
+          'Mapped surveyed agricultural parcels in QGIS and analyzed seasonal crop data for yield variations and resource utilization.',
+          'Compiled a structured analytical report and presented findings to the academic panel at Central University of Karnataka.'
+        ],
+        stack: ['QGIS', 'GPS Data Collection', 'Soil & Crop Survey', 'Excel', 'Analytical Reporting'],
+        liveUrl: 'https://www.linkedin.com/in/vara-prasad-ba0297252',
+        repoUrl: 'mailto:varaprasad501501@gmail.com?subject=Inquiry%20regarding%20Kalaburagi%20Agricultural%20Survey',
+        mapData: {
+          region: 'Kalaburagi District, Karnataka',
+          coords: '17.3297° N, 76.8343° E',
+          crs: 'EPSG:32643 · UTM Zone 43N',
+          layerType: 'Polygon + GPS · 15+ Surveyed Farm Plots',
+          points: [
+            { x: 120, y: 135, label: 'Irrigated Plot Cluster' },
+            { x: 280, y: 92, label: 'CUK Kadaganchi Base' },
+            { x: 440, y: 118, label: 'Rainfed Cropland' }
+          ]
+        }
+      }
+    ];
+
+    let activeCategory = 'All';
+    let currentProject = null;
+    let activeModalTab = 'overview';
+
+    const filterTabsEl = document.getElementById('filterTabs');
+    const projectsGridEl = document.getElementById('projectsGrid');
+    const modalEl = document.getElementById('projectModal');
+
+    function renderTabs() {
+      filterTabsEl.innerHTML = '';
+      CATEGORIES.forEach((cat) => {
+        const count = cat === 'All' ? PROJECTS.length : PROJECTS.filter((p) => p.category === cat).length;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `filter-btn mono ${activeCategory === cat ? 'active' : ''}`;
+        btn.textContent = `${cat} (${count})`;
+        btn.onclick = () => {
+          activeCategory = cat;
+          renderTabs();
+          renderFolders();
+        };
+        filterTabsEl.appendChild(btn);
+      });
+    }
+
+    function renderFolders() {
+      projectsGridEl.innerHTML = '';
+      const visible = activeCategory === 'All'
+        ? PROJECTS
+        : PROJECTS.filter((p) => p.category === activeCategory);
+
+      visible.forEach((project) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'folder-card-wrap';
+
+        wrap.innerHTML = `
+          <button type="button" class="folder-trigger" aria-label="Open ${project.plainTitle}">
+            <div class="folder-back-ear"></div>
+            <div class="folder-back-body">
+              <div class="doc-sheet-left">
+                <div class="mini-ui-bar"><span class="mini-dot"></span><span class="mini-dot"></span></div>
+                <div class="mini-line" style="width:76%"></div>
+                <div class="mini-line" style="width:52%"></div>
+              </div>
+
+              <div class="doc-sheet-right ${project.darkSheet ? 'dark-preview' : ''}">
+                <div class="mini-ui-bar">
+                  <span class="mini-dot"></span><span class="mini-dot"></span><span class="mini-dot"></span>
+                </div>
+                <div style="font-size:9px; font-weight:700; margin-bottom:5px; opacity:0.85;">${project.sheetHeader}</div>
+                <div class="mini-line" style="width:88%"></div>
+                <div class="mini-line" style="width:66%"></div>
+              </div>
+
+              <div class="doc-sheet-front mono">
+                <span>🗺️ ${project.folderLabel}</span>
+              </div>
+
+              <div class="folder-front-pocket">
+                <div class="folder-front-tab"></div>
+                <div class="folder-front-surface">
+                  <h3 class="folder-title">${project.title}</h3>
+                  <span class="folder-arrow-pill">↗</span>
+                </div>
+              </div>
+            </div>
+          </button>
+
+          <div class="folder-below-meta">
+            <div class="folder-below-row">
+              <span>${project.belowLeft}</span>
+              ${project.belowRight ? `<button type="button" class="folder-below-link">${project.belowRight}</button>` : ''}
+            </div>
+            ${project.ctaText ? `<div><button type="button" class="folder-below-link">${project.ctaText}</button></div>` : ''}
+          </div>
+        `;
+
+        wrap.querySelectorAll('button').forEach((btn) => {
+          btn.onclick = () => openFolderModal(project);
+        });
+
+        projectsGridEl.appendChild(wrap);
+      });
+    }
+
+    function renderModalContent() {
+      if (!currentProject) return;
+      const bodyEl = document.getElementById('modalBody');
+
+      document.querySelectorAll('.modal-tab-btn').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.tab === activeModalTab);
+      });
+
+      if (activeModalTab === 'overview') {
+        bodyEl.innerHTML = `<p class="modal-overview">${currentProject.overview}</p>`;
+      } else if (activeModalTab === 'highlights') {
+        bodyEl.innerHTML = `<ul class="modal-list">${currentProject.highlights.map((h) => `<li>${h}</li>`).join('')}</ul>`;
+      } else if (activeModalTab === 'stack') {
+        bodyEl.innerHTML = `<div class="tags mono">${currentProject.stack.map((s) => `<span class="tag">${s}</span>`).join('')}</div>`;
+      } else if (activeModalTab === 'map') {
+        const m = currentProject.mapData;
+        const polyPoints = m.points.map((p) => `${p.x},${p.y}`).join(' ');
+        const markersSvg = m.points
+          .map(
+            (p) => `
+            <g>
+              <circle cx="${p.x}" cy="${p.y}" r="18" fill="#FACC15" fill-opacity="0.22" />
+              <circle cx="${p.x}" cy="${p.y}" r="5.5" fill="#111111" stroke="#FACC15" stroke-width="2.5" />
+              <rect x="${p.x - 52}" y="${p.y - 26}" width="104" height="16" rx="4" fill="#111111" />
+              <text x="${p.x}" y="${p.y - 15}" text-anchor="middle" fill="#FFFFFF" font-size="8.2" font-family="monospace">${p.label}</text>
+            </g>`
+          )
+          .join('');
+
+        bodyEl.innerHTML = `
+          <div class="map-panel">
+            <div class="map-viewport">
+              <div class="map-hud-top mono">
+                <span class="map-pill">📍 ${m.region}</span>
+                <span class="map-pill">${m.crs}</span>
+              </div>
+              <svg viewBox="0 0 560 215" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                  <pattern id="gisGrid" width="35" height="35" patternUnits="userSpaceOnUse">
+                    <path d="M 35 0 L 0 0 0 35" fill="none" stroke="currentColor" stroke-opacity="0.08" stroke-width="1" />
+                  </pattern>
+                </defs>
+                <rect width="560" height="215" fill="url(#gisGrid)" />
+                <path d="M-20 170 Q 140 120, 290 155 T 580 125" fill="none" stroke="currentColor" stroke-opacity="0.14" stroke-width="1.5" />
+                <path d="M-20 65 Q 180 95, 340 45 T 580 80" fill="none" stroke="currentColor" stroke-opacity="0.12" stroke-width="1.5" />
+                <polygon points="${polyPoints}" fill="#FACC15" fill-opacity="0.14" stroke="#111111" stroke-width="1.6" stroke-dasharray="4 3" />
+                <polyline points="${polyPoints}" fill="none" stroke="#111111" stroke-width="2.2" />
+                ${markersSvg}
+              </svg>
+            </div>
+            <div class="map-meta-bar mono">
+              <span><strong>Layer:</strong> ${m.layerType}</span>
+              <span><strong>Center:</strong> ${m.coords}</span>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function openFolderModal(project) {
+      currentProject = project;
+      activeModalTab = 'overview';
+      document.getElementById('modalTabLabel').textContent = `📁 ${project.folderLabel}`;
+      document.getElementById('modalMeta').textContent = `${project.category} · ${project.role} · ${project.year}`;
+      document.getElementById('modalTitle').textContent = project.plainTitle;
+      document.getElementById('modalLive').href = project.liveUrl;
+      document.getElementById('modalRepo').href = project.repoUrl;
+      renderModalContent();
+      modalEl.classList.add('open');
+    }
+
+    function closeModal() {
+      modalEl.classList.remove('open');
+      currentProject = null;
+    }
+
+    document.querySelectorAll('.modal-tab-btn').forEach((btn) => {
+      btn.onclick = () => {
+        activeModalTab = btn.dataset.tab;
+        renderModalContent();
+      };
+    });
+
+    document.getElementById('closeModalBtn').onclick = closeModal;
+    document.getElementById('closeModalText').onclick = closeModal;
+    modalEl.onclick = (e) => {
+      if (e.target === modalEl) closeModal();
+    };
+
+    /* =========================================================
+       3. SCATTER-LETTER DRAWER MENU ANIMATION
+       ========================================================= */
+    const menuOverlay = document.getElementById('menuOverlay');
+    const scatterTargets = document.querySelectorAll('[data-scatter]');
+
+    scatterTargets.forEach((el) => {
+      const raw = el.textContent;
+      el.innerHTML = raw
+        .split('')
+        .map((ch) => (ch === ' ' ? ' ' : `<span class="scatter-char">${ch}</span>`))
+        .join('');
+    });
+
+    function openMenu() {
+      document.querySelectorAll('.scatter-char').forEach((span) => {
+        span.style.transform = 'translate(0, 0) rotate(0deg)';
+        span.style.opacity = '1';
+      });
+      menuOverlay.classList.add('open');
+      menuOverlay.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeMenuWithScatter() {
+      document.querySelectorAll('.scatter-char').forEach((span) => {
+        const dx = (Math.random() - 0.5) * 90;
+        const dy = (Math.random() - 0.3) * 80;
+        const rot = (Math.random() - 0.5) * 55;
+        span.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg)`;
+        span.style.opacity = '0';
+      });
+
+      setTimeout(() => {
+        menuOverlay.classList.remove('open');
+        menuOverlay.setAttribute('aria-hidden', 'true');
+      }, 280);
+    }
+
+    document.getElementById('menuToggle').onclick = openMenu;
+    document.getElementById('menuCloseBtn').onclick = closeMenuWithScatter;
+    menuOverlay.onclick = (e) => {
+      if (e.target === menuOverlay) closeMenuWithScatter();
+    };
+    menuOverlay.querySelectorAll('a').forEach((a) => {
+      a.onclick = () => closeMenuWithScatter();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+        if (menuOverlay.classList.contains('open')) closeMenuWithScatter();
+      }
+    });
+
+    /* =========================================================
+       4. EXPERIENCE CURVED WAVE SCROLL REVEAL
+       ========================================================= */
+    const expWaveSection = document.getElementById('expWaveSection');
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            expWaveSection.classList.add('in-view');
+          }
+        });
+      },
+      { threshold: 0.25 }
+    );
+    observer.observe(expWaveSection);
+
+    /* =========================================================
+       5. THEME-MATCHED EARTH & INDIAN + GLOBAL SATELLITES CANVAS
+       ========================================================= */
+    const orbitalStage = document.getElementById('orbitalStage');
+    const orbitalCanvas = document.getElementById('earthOrbitalCanvas');
+    const orbitalCtx = orbitalCanvas.getContext('2d');
+    const coordsReadout = document.getElementById('orbitalCoordsReadout');
+
+    let cw = 0;
+    let ch = 0;
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    const pointer = {
+      x: 0,
+      y: 0,
+      targetX: 0,
+      targetY: 0,
+      hovering: false
+    };
+
+    function resizeOrbitalCanvas() {
+      const rect = orbitalStage.getBoundingClientRect();
+      cw = rect.width;
+      ch = rect.height;
+      orbitalCanvas.width = cw * dpr;
+      orbitalCanvas.height = ch * dpr;
+      orbitalCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    window.addEventListener('resize', resizeOrbitalCanvas);
+    resizeOrbitalCanvas();
+
+    orbitalStage.addEventListener('mousemove', (e) => {
+      const rect = orbitalStage.getBoundingClientRect();
+      const nx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+      const ny = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+      pointer.targetX = nx;
+      pointer.targetY = ny;
+      pointer.hovering = true;
+
+      const lat = (17.3297 - ny * 18).toFixed(4);
+      const lon = (76.8343 + nx * 32).toFixed(4);
+      const latDir = lat >= 0 ? 'N' : 'S';
+      const lonDir = lon >= 0 ? 'E' : 'W';
+      coordsReadout.textContent = `${Math.abs(lat).toFixed(4)}° ${latDir}, ${Math.abs(lon).toFixed(4)}° ${lonDir} · EPSG:4326`;
+    });
+
+    orbitalStage.addEventListener('mouseleave', () => {
+      pointer.targetX = 0;
+      pointer.targetY = 0;
+      pointer.hovering = false;
+      coordsReadout.textContent = '17.3297° N, 76.8343° E · EPSG:4326';
+    });
+
+    const landDots = [];
+    for (let lat = -75; lat <= 75; lat += 6) {
+      const latRad = (lat * Math.PI) / 180;
+      const circumferenceFactor = Math.cos(latRad);
+      const lonStep = Math.max(6, Math.round(7 / Math.max(0.25, circumferenceFactor)));
+      for (let lon = -180; lon < 180; lon += lonStep) {
+        const lonRad = (lon * Math.PI) / 180;
+        const n1 = Math.sin(lonRad * 2.1 + 0.4) * Math.cos(latRad * 2.4);
+        const n2 = Math.cos(lonRad * 3.3 - 0.8) * Math.sin(latRad * 1.9 + 0.3);
+        if (n1 + n2 > 0.22) {
+          landDots.push({ lat: latRad, lon: lonRad });
+        }
+      }
+    }
+
+    const satellites = [
+      {
+        name: 'NAVIC-1I (IRNSS)',
+        indian: true,
+        rxFactor: 2.15,
+        ryFactor: 0.56,
+        tilt: -0.22,
+        angle: 0.2,
+        speed: 0.0105,
+      },
+      {
+        name: 'CARTOSAT-3',
+        indian: true,
+        rxFactor: 2.48,
+        ryFactor: 0.66,
+        tilt: 0.28,
+        angle: 1.4,
+        speed: -0.009,
+      },
+      {
+        name: 'SENTINEL-2A',
+        indian: false,
+        rxFactor: 2.82,
+        ryFactor: 0.58,
+        tilt: -0.14,
+        angle: 2.6,
+        speed: 0.0085,
+      },
+      {
+        name: 'RESOURCESAT-2A',
+        indian: true,
+        rxFactor: 1.95,
+        ryFactor: 0.78,
+        tilt: 0.44,
+        angle: 3.7,
+        speed: 0.0125,
+      },
+      {
+        name: 'LANDSAT-9',
+        indian: false,
+        rxFactor: 3.15,
+        ryFactor: 0.62,
+        tilt: 0.12,
+        angle: 4.8,
+        speed: -0.0075,
+      },
+      {
+        name: 'NISAR-SAR',
+        indian: true,
+        rxFactor: 2.62,
+        ryFactor: 0.74,
+        tilt: -0.34,
+        angle: 5.7,
+        speed: 0.0095,
+      }
+    ];
+
+    let earthSpin = 0.85;
+
+    function getThemePalette() {
+      const isDark = document.body.classList.contains('dark');
+      return isDark
+        ? {
+            isDark: true,
+            bg: '#111111',
+            fg: '#F4F3EF',
+            fgMuted: 'rgba(244, 243, 239, 0.22)',
+            fgLandStrong: 'rgba(244, 243, 239, 0.58)',
+            fgLandSoft: 'rgba(244, 243, 239, 0.25)',
+            graticule: 'rgba(244, 243, 239, 0.12)',
+            sphereStart: '#252523',
+            sphereMid: '#161615',
+            sphereEnd: '#0D0D0C',
+            sphereStroke: 'rgba(244, 243, 239, 0.34)',
+            accent: '#FACC15',
+            accentSoft: 'rgba(250, 204, 21, 0.26)',
+            orbitIndian: 'rgba(250, 204, 21, 0.34)',
+            orbitGlobal: 'rgba(244, 243, 239, 0.20)',
+            labelBg: 'rgba(17, 17, 17, 0.78)'
+          }
+        : {
+            isDark: false,
+            bg: '#F4F3EF',
+            fg: '#111111',
+            fgMuted: 'rgba(17, 17, 17, 0.22)',
+            fgLandStrong: 'rgba(17, 17, 17, 0.65)',
+            fgLandSoft: 'rgba(17, 17, 17, 0.28)',
+            graticule: 'rgba(17, 17, 17, 0.11)',
+            sphereStart: '#FFFFFF',
+            sphereMid: '#EAE8E1',
+            sphereEnd: '#DCD9D0',
+            sphereStroke: 'rgba(17, 17, 17, 0.32)',
+            accent: '#D97706',
+            accentSoft: 'rgba(217, 119, 6, 0.24)',
+            orbitIndian: 'rgba(217, 119, 6, 0.38)',
+            orbitGlobal: 'rgba(17, 17, 17, 0.18)',
+            labelBg: 'rgba(244, 243, 239, 0.85)'
+          };
+    }
+
+    function drawSatelliteGlyph(ctx, x, y, cx, cy, angle, sat, isFront, pal) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.globalAlpha = isFront ? 1 : 0.34;
+
+      const satColor = sat.indian ? pal.accent : pal.fg;
+
+      if (isFront) {
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo((cx - x) * 0.16, (cy - y) * 0.16);
+        ctx.strokeStyle = sat.indian ? pal.accentSoft : pal.graticule;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      ctx.rotate(angle * 0.3);
+      ctx.fillStyle = satColor;
+      ctx.fillRect(-12, -2.2, 8, 4.4);
+      ctx.fillRect(4, -2.2, 8, 4.4);
+
+      ctx.fillStyle = pal.bg;
+      ctx.strokeStyle = satColor;
+      ctx.lineWidth = 1.4;
+      ctx.fillRect(-3.2, -3.2, 6.4, 6.4);
+      ctx.strokeRect(-3.2, -3.2, 6.4, 6.4);
+      ctx.rotate(-angle * 0.3);
+
+      if (isFront) {
+        ctx.font = '700 9.5px ui-monospace, SFMono-Regular, Menlo, monospace';
+        const textW = ctx.measureText(sat.name).width;
+        ctx.fillStyle = pal.labelBg;
+        ctx.fillRect(13, -7, textW + 8, 14);
+        ctx.fillStyle = sat.indian ? pal.accent : pal.fg;
+        ctx.fillText(sat.name, 17, 3);
+      }
+
+      ctx.restore();
+    }
+
+    function renderOrbitalScene() {
+      const pal = getThemePalette();
+
+      pointer.x += (pointer.targetX - pointer.x) * 0.07;
+      pointer.y += (pointer.targetY - pointer.y) * 0.07;
+
+      const speedBoost = pointer.hovering ? 1.85 : 1;
+      earthSpin += 0.0032 * speedBoost + pointer.x * 0.006;
+
+      orbitalCtx.clearRect(0, 0, cw, ch);
+
+      const cx = cw * 0.5 + pointer.x * 26;
+      const cy = ch * 0.52 + pointer.y * 16;
+      const radius = Math.min(cw * 0.15, ch * 0.29, 102);
+
+      const halo = orbitalCtx.createRadialGradient(cx, cy, radius * 0.85, cx, cy, radius * 1.42);
+      halo.addColorStop(0, pal.accentSoft);
+      halo.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      orbitalCtx.fillStyle = halo;
+      orbitalCtx.beginPath();
+      orbitalCtx.arc(cx, cy, radius * 1.42, 0, Math.PI * 2);
+      orbitalCtx.fill();
+
+      const satStates = satellites.map((sat) => {
+        sat.angle += sat.speed * speedBoost;
+        const rx = radius * sat.rxFactor;
+        const ry = radius * sat.ryFactor;
+        const dynamicTilt = sat.tilt + pointer.y * 0.18;
+
+        const lx = Math.cos(sat.angle) * rx;
+        const ly = Math.sin(sat.angle) * ry;
+        const depth = Math.sin(sat.angle);
+
+        const sx = cx + lx * Math.cos(dynamicTilt) - ly * Math.sin(dynamicTilt);
+        const sy = cy + lx * Math.sin(dynamicTilt) + ly * Math.cos(dynamicTilt);
+
+        return { sat, rx, ry, dynamicTilt, sx, sy, depth };
+      });
+
+      satStates.forEach(({ sat, rx, ry, dynamicTilt }) => {
+        orbitalCtx.save();
+        orbitalCtx.translate(cx, cy);
+        orbitalCtx.rotate(dynamicTilt);
+        orbitalCtx.beginPath();
+        orbitalCtx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+        orbitalCtx.strokeStyle = sat.indian ? pal.orbitIndian : pal.orbitGlobal;
+        orbitalCtx.lineWidth = 1;
+        orbitalCtx.setLineDash([4, 5]);
+        orbitalCtx.stroke();
+        orbitalCtx.restore();
+      });
+
+      satStates
+        .filter((s) => s.depth <= 0)
+        .forEach(({ sat, sx, sy }) => {
+          drawSatelliteGlyph(orbitalCtx, sx, sy, cx, cy, sat.angle, sat, false, pal);
+        });
+
+      orbitalCtx.save();
+      const sphereGrad = orbitalCtx.createRadialGradient(
+        cx - radius * 0.32,
+        cy - radius * 0.32,
+        radius * 0.1,
+        cx,
+        cy,
+        radius
+      );
+      sphereGrad.addColorStop(0, pal.sphereStart);
+      sphereGrad.addColorStop(0.65, pal.sphereMid);
+      sphereGrad.addColorStop(1, pal.sphereEnd);
+
+      orbitalCtx.beginPath();
+      orbitalCtx.arc(cx, cy, radius, 0, Math.PI * 2);
+      orbitalCtx.fillStyle = sphereGrad;
+      orbitalCtx.fill();
+      orbitalCtx.strokeStyle = pal.sphereStroke;
+      orbitalCtx.lineWidth = 1.25;
+      orbitalCtx.stroke();
+
+      orbitalCtx.clip();
+
+      const tiltLat = pointer.y * 0.35;
+
+      orbitalCtx.strokeStyle = pal.graticule;
+      orbitalCtx.lineWidth = 0.85;
+      for (let lat = -60; lat <= 60; lat += 30) {
+        const latRad = (lat * Math.PI) / 180 + tiltLat * 0.4;
+        const yOff = Math.sin(latRad) * radius;
+        const rSlice = Math.cos(latRad) * radius;
+        if (rSlice > 2) {
+          orbitalCtx.beginPath();
+          orbitalCtx.ellipse(cx, cy + yOff, rSlice, rSlice * 0.22, 0, 0, Math.PI * 2);
+          orbitalCtx.stroke();
+        }
+      }
+
+      for (let m = 0; m < 6; m++) {
+        const merAngle = earthSpin + (m * Math.PI) / 6;
+        const rxMer = Math.cos(merAngle) * radius;
+        orbitalCtx.beginPath();
+        orbitalCtx.ellipse(cx, cy, Math.abs(rxMer), radius, 0, 0, Math.PI * 2);
+        orbitalCtx.stroke();
+      }
+
+      landDots.forEach((pt) => {
+        const lon = pt.lon + earthSpin;
+        const x3d = Math.cos(pt.lat) * Math.sin(lon);
+        const y3d = Math.sin(pt.lat) * Math.cos(tiltLat) - Math.cos(pt.lat) * Math.cos(lon) * Math.sin(tiltLat);
+        const z3d = Math.cos(pt.lat) * Math.cos(lon) * Math.cos(tiltLat) + Math.sin(pt.lat) * Math.sin(tiltLat);
+
+        if (z3d > 0) {
+          const px = cx + x3d * radius;
+          const py = cy - y3d * radius;
+          orbitalCtx.fillStyle = z3d > 0.45 ? pal.fgLandStrong : pal.fgLandSoft;
+          orbitalCtx.fillRect(px - 1.1, py - 1.1, 2.2, 2.2);
+        }
+      });
+
+      const cukLat = (17.33 * Math.PI) / 180;
+      const cukLon = (76.83 * Math.PI) / 180 + earthSpin;
+      const bx = Math.cos(cukLat) * Math.sin(cukLon);
+      const by = Math.sin(cukLat) * Math.cos(tiltLat) - Math.cos(cukLat) * Math.cos(cukLon) * Math.sin(tiltLat);
+      const bz = Math.cos(cukLat) * Math.cos(cukLon) * Math.cos(tiltLat) + Math.sin(cukLat) * Math.sin(tiltLat);
+
+      if (bz > 0.05) {
+        const bpx = cx + bx * radius;
+        const bpy = cy - by * radius;
+        orbitalCtx.beginPath();
+        orbitalCtx.arc(bpx, bpy, 6.5, 0, Math.PI * 2);
+        orbitalCtx.fillStyle = pal.accentSoft;
+        orbitalCtx.fill();
+
+        orbitalCtx.beginPath();
+        orbitalCtx.arc(bpx, bpy, 2.8, 0, Math.PI * 2);
+        orbitalCtx.fillStyle = pal.accent;
+        orbitalCtx.fill();
+      }
+
+      orbitalCtx.restore();
+
+      satStates
+        .filter((s) => s.depth > 0)
+        .forEach(({ sat, sx, sy }) => {
+          drawSatelliteGlyph(orbitalCtx, sx, sy, cx, cy, sat.angle, sat, true, pal);
+        });
+
+      requestAnimationFrame(renderOrbitalScene);
+    }
+
+    renderOrbitalScene();
+
+    /* =========================================================
+       6. THEME TOGGLE, COPY EMAIL & CONTACT DRAFT
+       ========================================================= */
+    const themeBtn = document.getElementById('themeToggle');
+    themeBtn.onclick = () => {
+      const isDark = document.body.classList.toggle('dark');
+      themeBtn.textContent = isDark ? '☀' : '☾';
+    };
+
+    document.getElementById('copyEmailBtn').onclick = () => {
+      navigator.clipboard?.writeText('varaprasad501501@gmail.com');
+      const btn = document.getElementById('copyEmailBtn');
+      btn.textContent = '✓';
+      setTimeout(() => (btn.textContent = '📋'), 1500);
+    };
+
+    document.getElementById('contactForm').onsubmit = (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const message = document.getElementById('message').value;
+      const subject = encodeURIComponent(`GIS & Remote Sensing Inquiry from ${name || 'Visitor'}`);
+      const body = encodeURIComponent(`${message}\n\nFrom: ${name} (${email})`);
+      window.location.href = `mailto:varaprasad501501@gmail.com?subject=${subject}&body=${body}`;
+    };
+
+    renderTabs();
+    renderFolders();
+  </script>
+</body>
+</html>
