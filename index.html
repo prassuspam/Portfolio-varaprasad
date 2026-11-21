@@ -1308,6 +1308,31 @@
       letter-spacing: 0.04em;
     }
 
+    .orbital-subline {
+      margin-top: 2px;
+      opacity: 0.72;
+      font-size: 9.5px;
+      letter-spacing: 0.015em;
+    }
+
+    .orbital-hud-legend {
+      position: absolute;
+      top: 18px;
+      right: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      align-items: flex-end;
+      pointer-events: none;
+      color: var(--muted);
+      font-size: 9px;
+      letter-spacing: 0.035em;
+    }
+    .orbital-hud-legend span { display: inline-flex; align-items: center; gap: 7px; }
+    .orbit-key { display: inline-block; width: 22px; height: 0; border-top: 1px dashed currentColor; }
+    .orbit-key.polar { color: #D97706; }
+    .orbit-key.geo { color: var(--text); border-top-style: solid; }
+
     .orbital-hud-right {
       position: absolute;
       bottom: 18px;
@@ -1342,6 +1367,13 @@
     .sat-dot.indian {
       background: #D97706;
       box-shadow: 0 0 6px rgba(217, 119, 6, 0.65);
+    }
+    @media (max-width: 680px) {
+      .orbital-stage { height: 410px; }
+      .orbital-hud-left { top: 14px; left: 16px; right: 16px; font-size: 9px; }
+      .orbital-hud-legend { top: 72px; left: 16px; right: auto; align-items: flex-start; font-size: 8px; }
+      .orbital-hud-right { left: 16px; right: 16px; bottom: 12px; gap: 5px; }
+      .sat-chip { padding: 3px 6px; font-size: 8px; }
     }
     body.dark .sat-dot.indian {
       background: #FACC15;
@@ -1886,20 +1918,26 @@
     <!-- Interactive Cursor-Responsive Earth & Satellite Constellation Stage -->
     <div class="orbital-stage" id="orbitalStage">
       <div class="orbital-hud-left mono">
-        <strong>INDIAN CONSTELLATION &amp; EO SATELLITES</strong>
-        <span id="orbitalCoordsReadout">17.3297° N, 76.8343° E · EPSG:4326</span>
+        <strong>EARTH OBSERVATION · ORBITAL SYSTEMS</strong>
+        <span id="orbitalCoordsReadout">17.3297° N, 76.8343° E · KALABURAGI, INDIA</span>
+        <span class="orbital-subline">Illustrative orbital simulation · drag to rotate Earth</span>
       </div>
 
-      <canvas id="earthOrbitalCanvas"></canvas>
+      <div class="orbital-hud-legend mono" aria-label="Orbit types">
+        <span><i class="orbit-key polar"></i> SUN-SYNCHRONOUS / POLAR</span>
+        <span><i class="orbit-key geo"></i> GEOSTATIONARY / GEOSYNCHRONOUS</span>
+      </div>
+
+      <canvas id="earthOrbitalCanvas" aria-label="Interactive Earth with illustrative satellite orbits and geographic markers"></canvas>
 
       <div class="orbital-hud-right mono">
-        <span class="sat-chip"><span class="sat-dot indian"></span> NAVIC-1I (IRNSS)</span>
-        <span class="sat-chip"><span class="sat-dot indian"></span> CARTOSAT-3 (ISRO)</span>
-        <span class="sat-chip"><span class="sat-dot indian"></span> RESOURCESAT-2A</span>
-        <span class="sat-chip"><span class="sat-dot indian"></span> RISAT-2B (SAR)</span>
-        <span class="sat-chip"><span class="sat-dot indian"></span> NISAR (NASA-ISRO)</span>
-        <span class="sat-chip"><span class="sat-dot"></span> LANDSAT-9</span>
-        <span class="sat-chip"><span class="sat-dot"></span> SENTINEL-2A</span>
+        <span class="sat-chip"><span class="sat-dot indian"></span> CARTOSAT-3 · EO</span>
+        <span class="sat-chip"><span class="sat-dot"></span> SENTINEL-1 · SAR</span>
+        <span class="sat-chip"><span class="sat-dot"></span> SENTINEL-2 · OPTICAL</span>
+        <span class="sat-chip"><span class="sat-dot"></span> LANDSAT-9 · EO</span>
+        <span class="sat-chip"><span class="sat-dot"></span> NISAR · SAR</span>
+        <span class="sat-chip"><span class="sat-dot indian"></span> INSAT-3D · WEATHER</span>
+        <span class="sat-chip"><span class="sat-dot indian"></span> NAVIC · NAVIGATION</span>
       </div>
     </div>
   </footer>
@@ -2583,61 +2621,15 @@ def compute_flood_vulnerability_overlay(dem_slope, drainage_density, ndwi, proxi
       }
     }
 
+    // Representative missions and orbit classes; positions are illustrative, not live ephemerides.
     const satellites = [
-      {
-        name: 'NAVIC-1I (IRNSS)',
-        indian: true,
-        rxFactor: 2.15,
-        ryFactor: 0.56,
-        tilt: -0.22,
-        angle: 0.2,
-        speed: 0.0105,
-      },
-      {
-        name: 'CARTOSAT-3',
-        indian: true,
-        rxFactor: 2.48,
-        ryFactor: 0.66,
-        tilt: 0.28,
-        angle: 1.4,
-        speed: -0.009,
-      },
-      {
-        name: 'SENTINEL-2A',
-        indian: false,
-        rxFactor: 2.82,
-        ryFactor: 0.58,
-        tilt: -0.14,
-        angle: 2.6,
-        speed: 0.0085,
-      },
-      {
-        name: 'RESOURCESAT-2A',
-        indian: true,
-        rxFactor: 1.95,
-        ryFactor: 0.78,
-        tilt: 0.44,
-        angle: 3.7,
-        speed: 0.0125,
-      },
-      {
-        name: 'LANDSAT-9',
-        indian: false,
-        rxFactor: 3.15,
-        ryFactor: 0.62,
-        tilt: 0.12,
-        angle: 4.8,
-        speed: -0.0075,
-      },
-      {
-        name: 'NISAR-SAR',
-        indian: true,
-        rxFactor: 2.62,
-        ryFactor: 0.74,
-        tilt: -0.34,
-        angle: 5.7,
-        speed: 0.0095,
-      }
+      { name: 'CARTOSAT-3', mission: 'Optical mapping', indian: true, orbit: 'polar', rxFactor: 1.18, ryFactor: 1.72, tilt: -0.22, angle: 0.2, speed: 0.0105 },
+      { name: 'SENTINEL-1', mission: 'C-band SAR', indian: false, orbit: 'polar', rxFactor: 1.42, ryFactor: 1.82, tilt: 0.18, angle: 1.4, speed: -0.009 },
+      { name: 'SENTINEL-2', mission: 'Multispectral optical', indian: false, orbit: 'polar', rxFactor: 1.62, ryFactor: 1.72, tilt: -0.12, angle: 2.6, speed: 0.0085 },
+      { name: 'LANDSAT-9', mission: 'Land monitoring', indian: false, orbit: 'polar', rxFactor: 1.86, ryFactor: 1.68, tilt: 0.10, angle: 3.7, speed: 0.0075 },
+      { name: 'NISAR', mission: 'L- and S-band SAR', indian: true, orbit: 'polar', rxFactor: 2.08, ryFactor: 1.78, tilt: -0.30, angle: 4.8, speed: -0.0082 },
+      { name: 'INSAT-3D', mission: 'Meteorology', indian: true, orbit: 'geo', rxFactor: 2.75, ryFactor: 0.42, tilt: 0.04, angle: 5.7, speed: 0.0032 },
+      { name: 'NAVIC', mission: 'Regional navigation', indian: true, orbit: 'geo', rxFactor: 2.42, ryFactor: 0.34, tilt: -0.08, angle: 2.1, speed: -0.0028 }
     ];
 
     let earthSpin = 0.85;
@@ -2781,8 +2773,8 @@ def compute_flood_vulnerability_overlay(dem_slope, drainage_density, ndwi, proxi
         orbitalCtx.beginPath();
         orbitalCtx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
         orbitalCtx.strokeStyle = sat.indian ? pal.orbitIndian : pal.orbitGlobal;
-        orbitalCtx.lineWidth = 1;
-        orbitalCtx.setLineDash([4, 5]);
+        orbitalCtx.lineWidth = sat.orbit === 'geo' ? 1.35 : 0.9;
+        orbitalCtx.setLineDash(sat.orbit === 'geo' ? [] : [4, 5]);
         orbitalCtx.stroke();
         orbitalCtx.restore();
       });
@@ -2853,25 +2845,35 @@ def compute_flood_vulnerability_overlay(dem_slope, drainage_density, ndwi, proxi
         }
       });
 
-      const cukLat = (17.33 * Math.PI) / 180;
-      const cukLon = (76.83 * Math.PI) / 180 + earthSpin;
-      const bx = Math.cos(cukLat) * Math.sin(cukLon);
-      const by = Math.sin(cukLat) * Math.cos(tiltLat) - Math.cos(cukLat) * Math.cos(cukLon) * Math.sin(tiltLat);
-      const bz = Math.cos(cukLat) * Math.cos(cukLon) * Math.cos(tiltLat) + Math.sin(cukLat) * Math.sin(tiltLat);
-
-      if (bz > 0.05) {
-        const bpx = cx + bx * radius;
-        const bpy = cy - by * radius;
-        orbitalCtx.beginPath();
-        orbitalCtx.arc(bpx, bpy, 6.5, 0, Math.PI * 2);
-        orbitalCtx.fillStyle = pal.accentSoft;
-        orbitalCtx.fill();
-
-        orbitalCtx.beginPath();
-        orbitalCtx.arc(bpx, bpy, 2.8, 0, Math.PI * 2);
-        orbitalCtx.fillStyle = pal.accent;
-        orbitalCtx.fill();
-      }
+      const groundLocations = [
+        { name: 'CUK · KALABURAGI', lat: 17.33, lon: 76.83, primary: true },
+        { name: 'NELLORE', lat: 14.44, lon: 79.99, primary: false },
+        { name: 'VISAKHAPATNAM', lat: 17.69, lon: 83.22, primary: false }
+      ];
+      groundLocations.forEach((place) => {
+        const latRad = place.lat * Math.PI / 180;
+        const lonRad = place.lon * Math.PI / 180 + earthSpin;
+        const px3d = Math.cos(latRad) * Math.sin(lonRad);
+        const py3d = Math.sin(latRad) * Math.cos(tiltLat) - Math.cos(latRad) * Math.cos(lonRad) * Math.sin(tiltLat);
+        const pz3d = Math.cos(latRad) * Math.cos(lonRad) * Math.cos(tiltLat) + Math.sin(latRad) * Math.sin(tiltLat);
+        if (pz3d > 0.05) {
+          const gx = cx + px3d * radius;
+          const gy = cy - py3d * radius;
+          orbitalCtx.beginPath();
+          orbitalCtx.arc(gx, gy, place.primary ? 7 : 4.5, 0, Math.PI * 2);
+          orbitalCtx.fillStyle = pal.accentSoft;
+          orbitalCtx.fill();
+          orbitalCtx.beginPath();
+          orbitalCtx.arc(gx, gy, place.primary ? 2.8 : 1.8, 0, Math.PI * 2);
+          orbitalCtx.fillStyle = pal.accent;
+          orbitalCtx.fill();
+          if (place.primary) {
+            orbitalCtx.font = '700 8px ui-monospace, SFMono-Regular, Menlo, monospace';
+            orbitalCtx.fillStyle = pal.fg;
+            orbitalCtx.fillText('CUK', gx + 8, gy - 7);
+          }
+        }
+      });
 
       orbitalCtx.restore();
 
