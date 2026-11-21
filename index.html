@@ -2331,7 +2331,12 @@ def compute_flood_vulnerability_overlay(dem_slope, drainage_density, ndwi, proxi
 
     let cw = 0;
     let ch = 0;
-    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const mobileCanvas = window.matchMedia('(max-width: 768px)');
+    let dpr = Math.min(window.devicePixelRatio || 1, mobileCanvas.matches ? 1.25 : 2);
+    const reduceGlobeMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let orbitalVisible = false;
+    let orbitalRafId = null;
+    let lastOrbitalFrame = 0;
 
     const pointer = {
       x: 0,
@@ -2341,16 +2346,46 @@ def compute_flood_vulnerability_overlay(dem_slope, drainage_density, ndwi, proxi
       hovering: false
     };
 
+    function scheduleOrbitalRender() {
+      if (!orbitalVisible || document.hidden || orbitalRafId !== null) return;
+      orbitalRafId = requestAnimationFrame(renderOrbitalScene);
+    }
+
     function resizeOrbitalCanvas() {
       const rect = orbitalStage.getBoundingClientRect();
       cw = rect.width;
       ch = rect.height;
-      orbitalCanvas.width = cw * dpr;
-      orbitalCanvas.height = ch * dpr;
+      dpr = Math.min(window.devicePixelRatio || 1, mobileCanvas.matches ? 1.25 : 2);
+      orbitalCanvas.width = Math.round(cw * dpr);
+      orbitalCanvas.height = Math.round(ch * dpr);
       orbitalCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      scheduleOrbitalRender();
     }
     window.addEventListener('resize', resizeOrbitalCanvas);
+    if (mobileCanvas.addEventListener) mobileCanvas.addEventListener('change', resizeOrbitalCanvas);
     resizeOrbitalCanvas();
+
+    const orbitalVisibilityObserver = new IntersectionObserver((entries) => {
+      orbitalVisible = entries.some(entry => entry.isIntersecting);
+      if (orbitalVisible) {
+        lastOrbitalFrame = 0;
+        scheduleOrbitalRender();
+      } else if (orbitalRafId !== null) {
+        cancelAnimationFrame(orbitalRafId);
+        orbitalRafId = null;
+      }
+    }, { rootMargin: '120px 0px' });
+    orbitalVisibilityObserver.observe(orbitalStage);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && orbitalRafId !== null) {
+        cancelAnimationFrame(orbitalRafId);
+        orbitalRafId = null;
+      } else if (!document.hidden) {
+        lastOrbitalFrame = 0;
+        scheduleOrbitalRender();
+      }
+    });
 
     let globeDragging = false;
     let lastDragX = 0;
@@ -2378,6 +2413,7 @@ def compute_flood_vulnerability_overlay(dem_slope, drainage_density, ndwi, proxi
       earthSpin += dx * 0.012;
       pointer.targetY = Math.max(-1, Math.min(1, pointer.targetY + dy / Math.max(1, rect.height) * 2));
       pointer.targetX = 0;
+      scheduleOrbitalRender();
     });
 
     function stopGlobeDrag(e) {
@@ -2402,6 +2438,7 @@ def compute_flood_vulnerability_overlay(dem_slope, drainage_density, ndwi, proxi
       pointer.targetX = nx;
       pointer.targetY = ny;
       pointer.hovering = true;
+      scheduleOrbitalRender();
 
       const lat = (17.3297 - ny * 18).toFixed(4);
       const lon = (76.8343 + nx * 32).toFixed(4);
@@ -2415,6 +2452,7 @@ def compute_flood_vulnerability_overlay(dem_slope, drainage_density, ndwi, proxi
       pointer.targetY = 0;
       pointer.hovering = false;
       coordsReadout.textContent = '17.3297° N, 76.8343° E · EPSG:4326';
+      scheduleOrbitalRender();
     });
 
     // Simplified world coastline outlines in [longitude, latitude].
@@ -2604,7 +2642,17 @@ def compute_flood_vulnerability_overlay(dem_slope, drainage_density, ndwi, proxi
       ctx.restore();
     }
 
-    function renderOrbitalScene() {
+    function renderOrbitalScene(timestamp = 0) {
+      orbitalRafId = null;
+      if (!orbitalVisible || document.hidden || !cw || !ch) return;
+
+      // Cap mobile drawing to about 30 FPS while keeping desktop animation fluid.
+      if (mobileCanvas.matches && timestamp && timestamp - lastOrbitalFrame < 1000 / 30) {
+        scheduleOrbitalRender();
+        return;
+      }
+      lastOrbitalFrame = timestamp || 0;
+
       const pal = getThemePalette();
 
       pointer.x += (pointer.targetX - pointer.x) * 0.07;
@@ -2750,10 +2798,11 @@ def compute_flood_vulnerability_overlay(dem_slope, drainage_density, ndwi, proxi
           drawSatelliteGlyph(orbitalCtx, sx, sy, cx, cy, sat.angle, sat, true, pal);
         });
 
-      requestAnimationFrame(renderOrbitalScene);
+      // Reduced-motion users get a still globe; pointer interaction can redraw it.
+      if (!reduceGlobeMotion) scheduleOrbitalRender();
     }
 
-    renderOrbitalScene();
+    // The observer starts the animation only when the globe approaches the viewport.
 
     /* =========================================================
        6. THEME TOGGLE, COPY EMAIL & CONTACT DRAFT
