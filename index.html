@@ -1010,20 +1010,55 @@
     .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     @media (max-width: 560px) { .form-row-2 { grid-template-columns: 1fr; } }
 
+    /* Separate frosted-glass contact form panel */
+    #contactForm {
+      padding: clamp(22px, 3.2vw, 36px);
+      border-radius: 24px;
+      background: var(--glass-front);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.34);
+      -webkit-backdrop-filter: blur(18px) saturate(145%);
+      backdrop-filter: blur(18px) saturate(145%);
+      min-width: 0;
+    }
+    body.dark #contactForm {
+      border-color: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 20px 54px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    }
+
     .form-group { margin-bottom: 20px; }
-    .form-group label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+    .form-group label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 8px; }
     .form-group input,
     .form-group textarea {
+      display: block;
       width: 100%;
-      background: transparent;
-      border: none;
-      border-bottom: 1px solid var(--border-strong);
-      padding: 8px 0;
+      box-sizing: border-box;
+      background: rgba(255, 255, 255, 0.24);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 12px 14px;
       color: var(--text);
       font-size: 14px;
+      line-height: 1.5;
       font-family: inherit;
       outline: none;
+      transition: border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
     }
+    body.dark .form-group input,
+    body.dark .form-group textarea {
+      background: rgba(255, 255, 255, 0.045);
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: var(--border-strong);
+      background: rgba(255, 255, 255, 0.42);
+      box-shadow: 0 0 0 3px rgba(128, 128, 128, 0.10);
+    }
+    body.dark .form-group input:focus,
+    body.dark .form-group textarea:focus {
+      background: rgba(255, 255, 255, 0.075);
+    }
+    .form-group textarea { resize: vertical; min-height: 112px; }
     .submit-btn {
       height: 44px;
       background: var(--btn-bg);
