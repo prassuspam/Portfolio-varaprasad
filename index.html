@@ -2811,6 +2811,7 @@ def compute_flood_vulnerability_overlay(dem_slope, drainage_density, ndwi, proxi
     themeBtn.onclick = () => {
       const isDark = document.body.classList.toggle('dark');
       themeBtn.textContent = isDark ? '☀' : '☾';
+      scheduleOrbitalRender();
     };
 
     document.getElementById('copyEmailBtn').onclick = () => {
